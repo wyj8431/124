@@ -1,0 +1,452 @@
+.ai-editor-tools-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #fff;
+}
+
+.ai-editor-tools-page__header {
+  flex-shrink: 0;
+  height: 56px;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.koutu-tools-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 10px 32px;
+}
+
+.koutu-tools-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.koutu-tools-header__home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  text-decoration: none;
+  color: #505a71;
+  font-size: 14px;
+  line-height: 22px;
+  transition: color 0.2s ease;
+}
+
+.koutu-tools-header__home-link:hover {
+  color: #0773fc;
+}
+
+.koutu-tools-header__logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #1b2337;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 22px;
+}
+
+.koutu-tools-header__divider {
+  width: 1px;
+  height: 24px;
+  background: #e5e6eb;
+}
+
+.koutu-tools-header__tool-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1b2337;
+  line-height: 22px;
+}
+
+.koutu-tools-header__right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.koutu-tools-header__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #505a71;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.koutu-tools-header__icon-btn:hover {
+  background: #f5f6f8;
+  color: #1b2337;
+}
+
+.koutu-tools-header__icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.koutu-tools-header__community {
+  position: relative;
+}
+
+.koutu-tools-header__community-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  display: none;
+  width: 180px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(27, 35, 55, 0.12);
+  text-align: center;
+}
+
+.koutu-tools-header__community:hover .koutu-tools-header__community-popover,
+.koutu-tools-header__community:focus-within .koutu-tools-header__community-popover {
+  display: block;
+}
+
+.koutu-tools-header__community-title {
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1b2337;
+}
+
+.koutu-tools-header__community-desc {
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #86909c;
+}
+
+.koutu-tools-header__community-popover img {
+  display: block;
+  width: 116px;
+  height: 116px;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
+.koutu-tools-header__action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: #f1f3f9;
+  color: #000;
+  font-size: 14px;
+  line-height: 36px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.koutu-tools-header__action-btn:hover {
+  opacity: 0.92;
+}
+
+.koutu-tools-header__action-btn--vip {
+  background: linear-gradient(90deg, #fceee1, #fcdac1);
+}
+
+.koutu-tools-header__login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 95px;
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: #635ff2;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.koutu-tools-header__user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 140px;
+  font-size: 14px;
+  color: #1b2337;
+}
+
+.koutu-tools-header__user img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ai-editor-tools-page__content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.tool-upload-assembly {
+  box-sizing: border-box;
+  width: 100%;
+  padding-top: 96px;
+  padding-bottom: 48px;
+}
+
+.tool-upload-assembly__title {
+  margin: 0 0 20px;
+  text-align: center;
+  font-size: 56px;
+  font-weight: 600;
+  line-height: 56px;
+  color: #1d2129;
+}
+
+.tool-upload-assembly__desc {
+  margin: 0 0 48px;
+  text-align: center;
+  font-size: 16px;
+  line-height: 16px;
+  color: #4e5969;
+}
+
+.tool-upload-assembly__content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  padding: 0 24px;
+}
+
+.koutu-content__left {
+  flex-shrink: 0;
+  width: 400px;
+  height: 400px;
+  overflow: hidden;
+  border: 1px solid #e5e6eb;
+  border-radius: 16px;
+  background: #f8f9fb;
+}
+
+.koutu-content__left video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.koutu-content__right {
+  flex-shrink: 0;
+  width: 760px;
+  min-height: 400px;
+  padding: 8px;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.koutu-content__right-default {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 384px;
+}
+
+.koutu-default-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.koutu-top-buttons {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.koutu-upload-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 188px;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.koutu-upload-button:hover {
+  opacity: 0.92;
+}
+
+.koutu-upload-button--batch {
+  background: #f1f3f9;
+  color: #505a71;
+}
+
+.koutu-upload-button--single {
+  background: linear-gradient(180deg, #504bf0, #7d79ff);
+  color: #fff;
+}
+
+.koutu-default-top__hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #8693ab;
+  text-align: center;
+}
+
+.koutu-default-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 560px;
+  max-width: 100%;
+  margin: 24px 0 16px;
+  font-size: 12px;
+  color: #8693ab;
+}
+
+.koutu-default-line::before,
+.koutu-default-line::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #eef0f3;
+}
+
+.koutu-default-line span {
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.koutu-default-bottom {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.koutu-bottom-item {
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  border: none;
+  border-radius: 8px;
+  background-color: #f5f6f8;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.koutu-bottom-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(27, 35, 55, 0.12);
+}
+
+.koutu-dropzone {
+  position: relative;
+}
+
+.koutu-dropzone--dragging .koutu-content__right-default {
+  outline: 2px dashed #635ff2;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+.koutu-hidden-input {
+  display: none;
+}
+
+.koutu-help-icon {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(27, 35, 55, 0.12);
+  color: #505a71;
+  cursor: pointer;
+}
+
+@media (max-width: 1280px) {
+  .tool-upload-assembly__content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .koutu-content__right {
+    width: min(760px, 100%);
+  }
+}
+
+@media (max-width: 768px) {
+  .tool-upload-assembly {
+    padding-top: 48px;
+  }
+
+  .tool-upload-assembly__title {
+    font-size: 36px;
+    line-height: 40px;
+  }
+
+  .koutu-tools-header {
+    padding: 10px 16px;
+  }
+
+  .koutu-tools-header__action-btn:not(.koutu-tools-header__action-btn--vip) {
+    display: none;
+  }
+
+  .koutu-content__left {
+    width: min(400px, 100%);
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .koutu-top-buttons {
+    flex-direction: column;
+    width: 100%;
+    max-width: 392px;
+  }
+
+  .koutu-upload-button {
+    width: 100%;
+  }
+
+  .koutu-default-bottom {
+    flex-wrap: wrap;
+    max-width: 320px;
+  }
+}

@@ -1,0 +1,352 @@
+.ai-creation-detail {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ai-creation-detail--visible {
+  pointer-events: auto;
+}
+
+.ai-creation-detail__mask {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.ai-creation-detail__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(27, 35, 55, 0.5);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ai-creation-detail__close:hover {
+  background: rgba(27, 35, 55, 0.72);
+}
+
+.ai-creation-detail__modal {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: min(1440px, 100vw);
+  height: min(836px, calc(100vh - 64px));
+  border-radius: 20px 20px 0 0;
+  background: #f1f3f9;
+  overflow: hidden;
+}
+
+.ai-creation-detail__body {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.detail-left {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  background: #f3f4f9;
+}
+
+.detail-left__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 58px;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.detail-left__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1b2337;
+  line-height: 1.2;
+}
+
+.detail-left__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.detail-left__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid #e8eaed;
+  border-radius: 8px;
+  background: #fff;
+  color: #1b2337;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.detail-left__btn:hover {
+  border-color: #d0d5dd;
+}
+
+.detail-left__btn--primary {
+  border: none;
+  background: linear-gradient(135deg, #635ff2 0%, #504bf0 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(99, 95, 242, 0.28);
+}
+
+.detail-left__btn--primary:hover {
+  box-shadow: 0 6px 16px rgba(99, 95, 242, 0.36);
+}
+
+.detail-preview-area {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 0 24px;
+}
+
+.detail-main-image-wrap {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: 100%;
+  padding: 16px 0;
+}
+
+.detail-main-video-shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 834px;
+  height: 100%;
+  max-height: 100%;
+}
+
+.detail-main-video {
+  width: auto;
+  height: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  border-radius: 16px;
+  object-fit: contain;
+  background: #eceef3;
+  box-shadow: 0 8px 24px rgba(27, 35, 55, 0.08);
+}
+
+.detail-main-video__badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #635ff2;
+  font-size: 11px;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.detail-right {
+  display: flex;
+  flex-direction: column;
+  width: 420px;
+  flex-shrink: 0;
+  margin: 10px 10px 10px 0;
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.detail-agent-chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.detail-agent-chat__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #f0f1f3;
+  flex-shrink: 0;
+}
+
+.detail-agent-chat__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f0f1f3;
+  flex-shrink: 0;
+}
+
+.detail-agent-chat__name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1b2337;
+}
+
+.detail-agent-chat__scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.detail-agent-chat__user-block {
+  margin-bottom: 16px;
+}
+
+.detail-agent-chat__user-prompt {
+  display: inline-block;
+  max-width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #f5f6f8;
+  color: #1b2337;
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.detail-agent-chat__script {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #2f3440;
+  color: #f5f7fa;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.detail-agent-chat__assistant {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f5f6f8;
+  color: #505a71;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.detail-agent-task {
+  margin: 8px 0 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f8f9fb;
+  border: 1px solid #eef0f3;
+}
+
+.detail-agent-task__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.detail-agent-task__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #635ff2;
+}
+
+.detail-agent-task__model {
+  font-size: 12px;
+  color: #86909c;
+}
+
+.detail-agent-task__preview {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #eceef3;
+}
+
+.detail-agent-task__preview video,
+.detail-agent-task__preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 9 / 16;
+  object-fit: contain;
+  background: #eceef3;
+}
+
+.detail-agent-chat__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0 4px;
+  color: #635ff2;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+@media (max-width: 1100px) {
+  .ai-creation-detail__modal {
+    height: calc(100vh - 48px);
+  }
+
+  .detail-right {
+    width: 340px;
+  }
+}
+
+@media (max-width: 900px) {
+  .ai-creation-detail__body {
+    flex-direction: column;
+  }
+
+  .detail-left {
+    flex: 1.2;
+  }
+
+  .detail-right {
+    width: auto;
+    height: 280px;
+    margin: 0 10px 10px;
+  }
+
+  .detail-preview-area {
+    padding: 0 16px;
+  }
+}

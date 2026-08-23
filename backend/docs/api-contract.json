@@ -1,0 +1,70 @@
+{
+  "info": {
+    "title": "创一创 Admin API",
+    "description": "创一创低代码设计平台后端接口",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "http://localhost:8080" }],
+  "paths": {
+    "/admin/auth/login": {
+      "post": {
+        "tags": ["认证"],
+        "summary": "用户登录",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string", "example": "demo" },
+                  "password": { "type": "string", "example": "123456" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/home/index": {
+      "get": {
+        "tags": ["首页"],
+        "summary": "首页聚合数据（一次拿齐所有区块）"
+      }
+    },
+    "/admin/templates": {
+      "get": {
+        "tags": ["模板"],
+        "summary": "模板分页列表",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "categoryId", "in": "query", "schema": { "type": "integer" } }
+        ]
+      }
+    },
+    "/admin/templates/search": {
+      "get": {
+        "tags": ["模板"],
+        "summary": "搜索模板",
+        "parameters": [
+          { "name": "keyword", "in": "query", "schema": { "type": "string" } }
+        ]
+      }
+    },
+    "/admin/designs": {
+      "get": { "tags": ["设计"], "summary": "最近设计列表（需登录）" },
+      "post": { "tags": ["设计"], "summary": "创建设计（需登录）" }
+    },
+    "/admin/designs/{id}": {
+      "get": { "tags": ["设计"], "summary": "设计详情（需登录）" },
+      "put": { "tags": ["设计"], "summary": "保存画布（需登录）" },
+      "delete": { "tags": ["设计"], "summary": "删除设计（需登录）" }
+    },
+    "/admin/ai-tools": {
+      "get": { "tags": ["AI工具"], "summary": "AI 工具列表" }
+    },
+    "/admin/ai-tools/{code}/invoke": {
+      "post": { "tags": ["AI工具"], "summary": "调用 AI 工具（需登录）" }
+    }
+  }
+}
