@@ -223,6 +223,16 @@ export const designApi = {
     height?: number
     unit?: string
   }) => api.post<ApiResult<UserDesign>>('/designs', data).then(unwrap),
+  getById: (id: number) => api.get<ApiResult<UserDesign>>(`/designs/${id}`).then(unwrap),
+  save: (id: number, data: {
+    title?: string
+    canvasJson?: string
+    coverUrl?: string
+    width?: number
+    height?: number
+    status?: number
+  }) => api.put<ApiResult<UserDesign>>(`/designs/${id}`, data).then(unwrap),
+  remove: (id: number) => api.delete<ApiResult<void>>(`/designs/${id}`).then(unwrap),
 }
 
 export const myDesignApi = {

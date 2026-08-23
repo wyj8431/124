@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { designApi, templateApi } from '@/api'
 import { useAuth } from '@/context/AuthContext'
 import { useCreateDesignModal } from '@/context/CreateDesignContext'
@@ -7,6 +8,7 @@ import type { RecentUsageItem, UserDesign } from '@/types'
 
 export function useDesignActions() {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const { isLoggedIn, setShowLoginModal } = useAuth()
   const { openCreateModal } = useCreateDesignModal()
 
@@ -26,13 +28,14 @@ export function useDesignActions() {
         return
       }
       try {
-        await designApi.create({ sceneId, title: '未命名设计' })
+        const design = await designApi.create({ sceneId, title: '未命名设计' })
         invalidateSidebar()
+        navigate(`/editor/${design.id}`)
       } catch {
         alert('创建失败，请确认后端已启动')
       }
     },
-    [isLoggedIn, setShowLoginModal, invalidateSidebar, openCreateModal],
+    [isLoggedIn, setShowLoginModal, invalidateSidebar, navigate, openCreateModal],
   )
 
   const handleOpenDesign = useCallback(
@@ -41,9 +44,9 @@ export function useDesignActions() {
         setShowLoginModal(true)
         return
       }
-      alert(`即将打开设计「${design.title}」`)
+      navigate(`/editor/${design.id}`)
     },
-    [isLoggedIn, setShowLoginModal],
+    [isLoggedIn, setShowLoginModal, navigate],
   )
 
   const handleRecentUsage = useCallback(
@@ -58,13 +61,14 @@ export function useDesignActions() {
       }
       try {
         await templateApi.use(item.targetId)
-        await designApi.create({ templateId: item.targetId, title: item.name })
+        const design = await designApi.create({ templateId: item.targetId, title: item.name })
         invalidateSidebar()
+        navigate(`/editor/${design.id}`)
       } catch {
         alert('操作失败，请确认后端已启动')
       }
     },
-    [handleCreate, isLoggedIn, setShowLoginModal, invalidateSidebar],
+    [handleCreate, isLoggedIn, setShowLoginModal, invalidateSidebar, navigate],
   )
 
   return {

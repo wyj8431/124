@@ -21,6 +21,7 @@ import { FeedbackSuccessPage } from '@/pages/FeedbackSuccessPage'
 import { AiVideoTopicPage } from '@/pages/AiVideoTopicPage'
 import { AiPosterTopicPage } from '@/pages/AiPosterTopicPage'
 import { KoutuEditorPage } from '@/pages/KoutuEditorPage'
+import { DesignEditorPage } from '@/pages/DesignEditorPage'
 import { SidebarLayoutProvider, useSidebarLayout } from '@/context/SidebarLayoutContext'
 import { CreateDesignProvider } from '@/context/CreateDesignContext'
 import { MembershipModalProvider } from '@/context/MembershipModalContext'
@@ -89,6 +90,7 @@ export default function App() {
           <Route path="/feedback" element={<FeedbackPage />} />
           <Route path="/feedback/success/:id" element={<FeedbackSuccessPage />} />
           <Route path="/editor/koutu" element={<KoutuEditorPage />} />
+          <Route path="/editor/:id" element={<DesignEditorPage />} />
           <Route element={<AppShell />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/templates" element={<TemplateCenterPage />} />
