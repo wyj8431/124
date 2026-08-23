@@ -67,11 +67,11 @@ public class OrderCenterService {
         ));
 
         OrderCenterIndexDto.BankAccount bank = new OrderCenterIndexDto.BankAccount();
-        bank.setCompanyName("杭州创一创网络科技有限公司");
+        bank.setCompanyName("杭州灵图工坊网络科技有限公司");
         bank.setBankName("招商银行杭州分行营业部");
         bank.setAccountNo("5719 1234 5678 901");
         bank.setTaxNo("91330100MA2XXXXX1X");
-        bank.setRemark("请在转账备注中填写创一创用户ID");
+        bank.setRemark("请在转账备注中填写灵图工坊用户ID");
         bank.setTip("对公转账到账后请提交转账信息，财务将在 1-2 个工作日内确认。");
         dto.setBankAccount(bank);
         return dto;

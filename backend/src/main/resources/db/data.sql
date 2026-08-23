@@ -502,7 +502,7 @@ FROM user_design d
 WHERE d.user_id = 1 AND d.deleted = 0 AND d.id <= 6;
 
 INSERT INTO user_message (user_id, category, title, summary, content, link_url, link_text, is_read, create_time) VALUES
-(1, 'system', '欢迎使用创一创', '感谢您注册创一创，开启您的创意设计之旅', '<p>亲爱的用户，欢迎加入创一创！</p><p>在这里您可以：</p><ul><li>使用 100 万+ 精美模板快速创作</li><li>体验 AI 智能设计工具</li><li>下载正版商用授权作品</li></ul><p>如有任何问题，欢迎联系在线客服。</p>', '/', '前往首页', 0, DATEADD('DAY', -2, CURRENT_TIMESTAMP)),
+(1, 'system', '欢迎使用灵图工坊', '感谢您注册灵图工坊，开启您的创意设计之旅', '<p>亲爱的用户，欢迎加入灵图工坊！</p><p>在这里您可以：</p><ul><li>使用 100 万+ 精美模板快速创作</li><li>体验 AI 智能设计工具</li><li>下载正版商用授权作品</li></ul><p>如有任何问题，欢迎联系在线客服。</p>', '/', '前往首页', 0, DATEADD('DAY', -2, CURRENT_TIMESTAMP)),
 (1, 'activity', '春季会员限时优惠', 'VIP 会员年卡 8 折，活动截止 3 月 31 日', '<p>春季特惠来袭！</p><p>即日起至 3 月 31 日，购买 VIP 年卡享 <strong>8 折优惠</strong>，还可额外获得 500 AI 积分。</p><p>立即开通，解锁全部模板与商用授权权益。</p>', '/price/vip', '立即开通', 0, DATEADD('DAY', -1, CURRENT_TIMESTAMP)),
 (1, 'order', '订单支付成功', '您的 VIP 会员订单已支付成功', '<p>订单编号：MO202603150001</p><p>商品名称：VIP 会员 · 年卡</p><p>支付金额：¥198.00</p><p>会员有效期已自动延长，感谢您的支持！</p>', '/usercenter/vip', '查看订单', 1, DATEADD('HOUR', -6, CURRENT_TIMESTAMP)),
 (1, 'system', '账号安全提醒', '您的账号在新设备上登录', '<p>检测到您的账号于 2026-03-19 14:30 在新设备上登录。</p><p>如非本人操作，请立即修改密码并联系客服。</p>', NULL, NULL, 1, DATEADD('HOUR', -12, CURRENT_TIMESTAMP));

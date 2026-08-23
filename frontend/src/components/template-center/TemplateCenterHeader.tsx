@@ -24,7 +24,7 @@ export function TemplateCenterHeader({ keyword, onKeywordChange, onSearch }: Pro
       <div className="mx-auto flex h-[60px] max-w-[1400px] items-center gap-6 px-6">
         <Link to="/" className="flex shrink-0 items-center gap-2">
           <PlatformLogo className="h-8 w-8 shadow-sm ring-1 ring-[#ffd660]/45" />
-          <span className="text-base font-semibold text-ckt-text">创一创</span>
+          <span className="text-base font-semibold text-ckt-text">灵图工坊</span>
         </Link>
 
         <form

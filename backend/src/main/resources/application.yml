@@ -60,7 +60,7 @@ chuangkit:
     aliyun:
       access-key-id: ${ALIYUN_ACCESS_KEY_ID:}
       access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET:}
-      sign-name: ${ALIYUN_SMS_SIGN:创一创}
+      sign-name: ${ALIYUN_SMS_SIGN:灵图工坊}
       template-code: ${ALIYUN_SMS_TEMPLATE:}
 
 springdoc:
