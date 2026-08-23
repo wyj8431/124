@@ -1,7 +1,7 @@
 {
   "info": {
-    "title": "创一创 Admin API",
-    "description": "创一创低代码设计平台后端接口",
+    "title": "灵图工坊 Admin API",
+    "description": "灵图工坊低代码设计平台后端接口",
     "version": "1.0.0"
   },
   "servers": [{ "url": "http://localhost:8080" }],

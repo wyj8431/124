@@ -15,7 +15,7 @@
     <artifactId>chuangkit-admin</artifactId>
     <version>1.0.0</version>
     <name>chuangkit-admin</name>
-    <description>创一创低代码设计平台 - 后端 Admin API</description>
+    <description>灵图工坊低代码设计平台 - 后端 Admin API</description>
 
     <properties>
         <java.version>21</java.version>

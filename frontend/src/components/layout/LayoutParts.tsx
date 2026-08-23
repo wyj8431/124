@@ -114,7 +114,7 @@ export function TopHeader() {
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-ckt-border bg-white/90 px-6 backdrop-blur-md">
       <div className="flex items-center gap-2">
         <PlatformLogo className="h-8 w-8 shadow-sm ring-1 ring-[#ffd660]/45" />
-        <span className="text-base font-semibold text-ckt-text">创一创</span>
+        <span className="text-base font-semibold text-ckt-text">灵图工坊</span>
       </div>
 
       <div className="flex items-center gap-5">

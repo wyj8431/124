@@ -103,7 +103,7 @@ export function FeedbackPage() {
       <header className="feedback-page__header">
         <Link to={homeLink} className="feedback-page__brand">
           <PlatformLogo className="h-8 w-8 shadow-sm ring-1 ring-[#ffd660]/45" />
-          <span>创一创</span>
+          <span>灵图工坊</span>
         </Link>
         <Link to={homeLink} className="feedback-page__home-link">
           <ArrowLeft className="h-4 w-4" />

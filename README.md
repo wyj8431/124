@@ -1,11 +1,11 @@
-# 创一创低代码设计平台
+# 灵图工坊低代码设计平台
 
 100% 还原 [创客贴官网](https://www.chuangkit.com/designtools/designindex) 的在线设计平台，前后端真实数据互联。
 
 ## 项目结构
 
 ```
-创一创/
+灵图工坊/
 ├── backend/     # Java Spring Boot 后端（/admin API）
 └── frontend/    # React 19 + Vite + Tailwind 前端
 ```

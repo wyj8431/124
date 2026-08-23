@@ -219,8 +219,8 @@ public class AuthRecordService {
             <div class="row"><span class="label">证件号码</span><span class="value">%s</span></div>
             <div class="row"><span class="label">作品尺寸</span><span class="value">%s</span></div>
             <div class="row"><span class="label">授权时间</span><span class="value">%s</span></div>
-            <p>本授权书证明上述设计作品已通过创一创平台完成正版商用授权，授权方可在授权范围内进行商业使用。</p>
-            <div class="footer">创一创 · 正版商用授权<br/>%s</div></body></html>
+            <p>本授权书证明上述设计作品已通过灵图工坊平台完成正版商用授权，授权方可在授权范围内进行商业使用。</p>
+            <div class="footer">灵图工坊 · 正版商用授权<br/>%s</div></body></html>
             """.formatted(
             esc(record.getAuthNo()),
             esc(record.getDesignTitle()),

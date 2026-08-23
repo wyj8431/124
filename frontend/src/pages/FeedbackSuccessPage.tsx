@@ -116,7 +116,7 @@ export function FeedbackSuccessPage() {
       <header className="feedback-success__header">
         <Link to={homeLink} className="feedback-success__brand">
           <PlatformLogo className="h-8 w-8 shadow-sm ring-1 ring-[#ffd660]/45" />
-          <span>创一创</span>
+          <span>灵图工坊</span>
         </Link>
         <Link to={homeLink} className="feedback-success__home-link">
           <ArrowLeft className="h-4 w-4" />
@@ -162,7 +162,7 @@ export function FeedbackSuccessPage() {
           </div>
         </div>
 
-        <p className="feedback-success__footnote">您的反馈对我们非常重要，感谢支持创一创</p>
+        <p className="feedback-success__footnote">您的反馈对我们非常重要，感谢支持灵图工坊</p>
       </div>
     </div>
   )

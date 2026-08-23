@@ -178,7 +178,7 @@ function BrandPanel() {
 
       <div className="relative flex items-center gap-2">
         <PlatformLogo className="h-9 w-9 shadow-md ring-1 ring-white/30" />
-        <span className="text-lg font-semibold tracking-wide">创一创</span>
+        <span className="text-lg font-semibold tracking-wide">灵图工坊</span>
       </div>
 
       <div className="relative mt-10">
@@ -237,7 +237,7 @@ function QrLoginView({
     <div className="mx-auto flex w-full max-w-sm flex-col items-center">
       <h3 className="text-xl font-semibold text-ckt-text">微信扫码安全登录</h3>
       <p className="mt-2 text-center text-xs leading-relaxed text-gray-400">
-        未在创一创内完成绑定的微信和手机号，是两个独立账号
+        未在灵图工坊内完成绑定的微信和手机号，是两个独立账号
       </p>
 
       <div className="relative mt-5 rounded-lg border border-gray-100 p-2.5 shadow-sm">
@@ -311,7 +311,7 @@ function PasswordLoginView({
   return (
     <div className="w-full max-w-[340px]">
       <h3 className="mb-1 text-center text-xl font-semibold text-ckt-text">密码登录</h3>
-      <p className="mb-6 text-center text-xs text-gray-400">使用账号密码登录创一创</p>
+      <p className="mb-6 text-center text-xs text-gray-400">使用账号密码登录灵图工坊</p>
 
       <form onSubmit={onSubmit} autoComplete="off" className="space-y-4">
         <input

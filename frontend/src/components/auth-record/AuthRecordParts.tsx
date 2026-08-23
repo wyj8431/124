@@ -154,7 +154,7 @@ export function AuthRecordEmpty({ text }: { text: string }) {
 export function AuthRecordFooter() {
   return (
     <footer className="auth-record-footer">
-      <span>Copyright©创一创科技有限公司</span>
+      <span>Copyright©灵图工坊科技有限公司</span>
       <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">
         京ICP备14056892号-1
       </a>
