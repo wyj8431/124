@@ -20,9 +20,9 @@ mvn spring-boot:run
 
 | 地址 | 说明 |
 |------|------|
-| http://localhost:8080/admin/home/index | 首页聚合数据 |
-| http://localhost:8080/admin/swagger-ui.html | API 文档 |
-| http://localhost:8080/h2-console | H2 数据库控制台（dev 环境） |
+| http://localhost:8081/admin/home/index | 首页聚合数据 |
+| http://localhost:8081/admin/swagger-ui.html | API 文档 |
+| http://localhost:8081/h2-console | H2 数据库控制台（dev 环境） |
 
 ### 演示账号
 
@@ -225,7 +225,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=prod
 
 ```javascript
 // .env.development
-VITE_API_BASE=http://localhost:8080/admin
+VITE_API_BASE=http://localhost:8081/admin
 ```
 
 ---

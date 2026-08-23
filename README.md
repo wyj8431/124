@@ -22,7 +22,7 @@ mvnw.cmd spring-boot:run
 ```
 
 后端地址：http://localhost:8081  
-API 文档：http://localhost:8080/admin/swagger-ui.html
+API 文档：http://localhost:8081/admin/swagger-ui.html
 
 ### 2. 前端
 
