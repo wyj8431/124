@@ -212,7 +212,7 @@ export function CreateDesignModal() {
       try {
         const w = opts?.width ?? Number(customWidth)
         const h = opts?.height ?? Number(customHeight)
-        await designApi.create({
+        const design = await designApi.create({
           sceneId: opts?.sceneId ?? selectedSceneId ?? undefined,
           title: opts?.title ?? '未命名设计',
           width: Number.isFinite(w) ? w : undefined,
@@ -221,7 +221,7 @@ export function CreateDesignModal() {
         })
         invalidateSidebar()
         closeCreateModal()
-        alert('设计已创建')
+        navigate(`/editor/${design.id}`)
       } catch {
         alert('创建失败，请确认后端已启动并已登录')
       } finally {
@@ -236,6 +236,7 @@ export function CreateDesignModal() {
       unit,
       invalidateSidebar,
       closeCreateModal,
+      navigate,
     ],
   )
 
@@ -245,17 +246,17 @@ export function CreateDesignModal() {
       setCreating(true)
       try {
         await templateApi.use(t.id)
-        await designApi.create({ templateId: t.id, title: t.title })
+        const design = await designApi.create({ templateId: t.id, title: t.title })
         invalidateSidebar()
         closeCreateModal()
-        alert(`已基于「${t.title}」创建设计`)
+        navigate(`/editor/${design.id}`)
       } catch {
         alert('操作失败，请确认后端已启动')
       } finally {
         setCreating(false)
       }
     },
-    [requireLogin, invalidateSidebar, closeCreateModal],
+    [requireLogin, invalidateSidebar, closeCreateModal, navigate],
   )
 
   const handleSearch = () => setKeyword(searchInput.trim())
@@ -264,15 +265,15 @@ export function CreateDesignModal() {
     if (!requireLogin()) return
     setCreating(true)
     try {
-      const uploaded = await aiApi.upload(file)
-      await designApi.create({
+      await aiApi.upload(file)
+      const design = await designApi.create({
         title: type === 'image' ? '导入图片' : file.name.replace(/\.[^.]+$/, ''),
         width: 800,
         height: type === 'image' ? 800 : 600,
       })
       invalidateSidebar()
       closeCreateModal()
-      alert(`已导入${type === 'image' ? '图片' : '文件'}：${uploaded.filename}`)
+      navigate(`/editor/${design.id}`)
     } catch {
       alert('导入失败')
     } finally {

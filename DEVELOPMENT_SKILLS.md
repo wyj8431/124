@@ -9,7 +9,7 @@
 | --- | --- | --- |
 | 首页与导航 | 已完成核心页面、侧边栏、搜索、模板瀑布流和热点日历 | `frontend/src/pages/HomePage.tsx` 与路由配置 |
 | 用户与会员 | 已具备登录、注册、JWT 鉴权、会员及订单相关页面/接口 | `AuthController`、`JwtAuthFilter` 及用户中心路由 |
-| 模板与设计 | 已具备模板搜索、按分类筛选、基于模板创建设计的接口 | 前端 API 映射与 `TemplateController`、`DesignController` |
+| 模板与设计 | 已具备模板搜索、按分类筛选、基于模板创建设计和设计编辑器 MVP | 前端 API 映射、`DesignController` 与 `DesignEditorPage` |
 | AI 与专题 | 已具备 AI 工具、AI 海报和 AI 视频专题页面及后端控制器 | `ToolsPage`、专题页面和 `AiGenerateController` |
 | 本地联调 | 已验证前端 `http://localhost:5173` 和后端 `GET /admin/home/index` 正常响应 | 2026-08-22 本地运行验证 |
 | 品牌 | 首页顶部共用品牌文字已更新为“灵图工坊” | `PlatformBrand.tsx` |
@@ -17,7 +17,7 @@
 
 ### 当前待处理项
 
-1. 设计编辑器的画布 CRUD、AI 工具完整流程和模板详情仍需要按产品验收补齐。
+1. 设计编辑器高级能力（多选、缩放、旋转、丰富素材）以及 AI 工具完整流程和模板详情仍需要按产品验收补齐。
 2. `npm run lint` 当前有 9 条非阻断警告，主要涉及 `useMemo` 依赖和 Context 文件的 Fast Refresh 导出规则。
 3. 项目 README 中的后端地址和本机 JDK 路径需要在发布前统一校正；当前本地后端实际运行在 `8081`。
 

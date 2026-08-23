@@ -237,6 +237,10 @@ export interface UserDesign {
   coverUrl?: string
   sceneId?: number
   templateId?: number
+  width?: number
+  height?: number
+  canvasJson?: string
+  status?: number
   updateTime?: string
 }
 
