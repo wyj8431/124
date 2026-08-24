@@ -13,7 +13,7 @@ import {
   Undo2,
   Upload,
 } from 'lucide-react'
-import { designApi, aiApi } from '@/api'
+import { designApi, aiApi, usageApi } from '@/api'
 import { LoginModal } from '@/components/auth/LoginModal'
 import { useAuth } from '@/context/AuthContext'
 import type { UserDesign } from '@/types'
@@ -299,6 +299,12 @@ export function DesignEditorPage() {
   }
 
   const exportPng = async () => {
+    try {
+      await usageApi.consume('export')
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : '今日导出额度已用完，请升级会员')
+      return
+    }
     const output = window.document.createElement('canvas')
     const multiplier = 2
     output.width = document.width * multiplier

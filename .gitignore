@@ -1,8 +1,14 @@
 # Dependencies and package manager caches
 frontend/node_modules/
+admin-web/node_modules/
+admin-web/package-lock.json
 
 # Build output
 frontend/dist/
+admin-web/dist/
+admin-web/*.tsbuildinfo
+admin-web/vite.config.js
+admin-web/vite.config.d.ts
 backend/target/
 
 # Local runtime data

@@ -235,6 +235,12 @@ export const designApi = {
   remove: (id: number) => api.delete<ApiResult<void>>(`/designs/${id}`).then(unwrap),
 }
 
+export const usageApi = {
+  getQuota: () => api.get<ApiResult<import('@/types').UsageQuota>>('/usage/quota').then(unwrap),
+  consume: (action: 'create' | 'save' | 'export') =>
+    api.post<ApiResult<import('@/types').UsageQuota>>('/usage/consume', { action }).then(unwrap),
+}
+
 export const myDesignApi = {
   getIndex: () =>
     api.get<ApiResult<MyDesignIndexData>>('/my-design/index').then(unwrap),
@@ -421,6 +427,7 @@ export const aiTopicApi = {
 }
 
 export const aiApi = {
+  getTask: (id: number) => api.get<ApiResult<{ id: number; status: number; outputUrl?: string; errorMsg?: string }>>(`/ai-tasks/${id}`).then(unwrap),
   getConfig: (mode: string) =>
     api.get<ApiResult<import('@/types').AiModeConfig>>(`/ai/config?mode=${mode}`).then(unwrap),
   generate: (data: {

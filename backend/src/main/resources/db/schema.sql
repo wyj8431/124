@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS sys_user (
     avatar          VARCHAR(512),
     phone           VARCHAR(20),
     email           VARCHAR(128),
+    system_role     VARCHAR(32) DEFAULT 'user' COMMENT 'user/admin/operator',
     member_level    TINYINT DEFAULT 0 COMMENT '0免费 1VIP 2团队版',
     member_expire   DATETIME,
     status          TINYINT DEFAULT 1 COMMENT '1正常 0禁用',
@@ -20,7 +21,24 @@ CREATE TABLE IF NOT EXISTS sys_user (
     update_time     DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE sys_user ADD COLUMN IF NOT EXISTS system_role VARCHAR(32) DEFAULT 'user';
+
 CREATE UNIQUE INDEX IF NOT EXISTS uk_sys_user_phone ON sys_user(phone);
+
+-- 免费用户每日创建、保存、导出额度；会员用户不受此表限制
+CREATE TABLE IF NOT EXISTS user_usage_daily (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT NOT NULL,
+    usage_date      DATE NOT NULL,
+    create_count    INT DEFAULT 0,
+    save_count      INT DEFAULT 0,
+    export_count    INT DEFAULT 0,
+    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_user_usage_daily UNIQUE (user_id, usage_date)
+);
+
+CREATE INDEX idx_user_usage_daily_user_date ON user_usage_daily(user_id, usage_date);
 
 -- 设计场景/尺寸（海报、小红书、PPT 等）
 CREATE TABLE IF NOT EXISTS design_scene (
@@ -137,6 +155,50 @@ CREATE TABLE IF NOT EXISTS ai_task (
     create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
     finish_time     DATETIME
 );
+
+-- 可配置 AI Provider（密钥仅由后端环境变量注入）
+CREATE TABLE IF NOT EXISTS ai_provider (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name            VARCHAR(128) NOT NULL,
+    code            VARCHAR(64) NOT NULL UNIQUE,
+    endpoint        VARCHAR(512),
+    api_key_env     VARCHAR(128),
+    model           VARCHAR(128),
+    enabled         TINYINT DEFAULT 1,
+    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 客服工单
+CREATE TABLE IF NOT EXISTS support_ticket (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT NOT NULL,
+    subject         VARCHAR(256) NOT NULL,
+    content         VARCHAR(4000) NOT NULL,
+    priority        VARCHAR(16) DEFAULT 'normal',
+    status          VARCHAR(32) DEFAULT 'open' COMMENT 'open/pending/resolved/closed',
+    assignee_id     BIGINT,
+    last_reply      VARCHAR(2000),
+    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_support_ticket_user_status ON support_ticket(user_id, status);
+
+-- 设备告警
+CREATE TABLE IF NOT EXISTS device_alert (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT NOT NULL,
+    device_id       VARCHAR(128) NOT NULL,
+    alert_type      VARCHAR(64) NOT NULL,
+    severity        VARCHAR(16) DEFAULT 'warning',
+    message         VARCHAR(1000) NOT NULL,
+    status          VARCHAR(32) DEFAULT 'open' COMMENT 'open/acknowledged/resolved',
+    occurred_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    resolved_at     DATETIME,
+    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_device_alert_user_status ON device_alert(user_id, status);
 
 -- 首页功能卡片（热门推荐、AI电商等 Tab 下的卡片）
 CREATE TABLE IF NOT EXISTS home_feature (
@@ -309,6 +371,68 @@ CREATE TABLE IF NOT EXISTS team_member (
 
 CREATE INDEX idx_team_member_user ON team_member(user_id);
 CREATE INDEX idx_team_owner ON team(owner_id);
+
+-- 团队协作邀请
+CREATE TABLE IF NOT EXISTS team_invitation (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    team_id         BIGINT NOT NULL,
+    inviter_id      BIGINT NOT NULL,
+    invitee_id      BIGINT,
+    invitee_email   VARCHAR(128),
+    token           VARCHAR(128) NOT NULL UNIQUE,
+    role            VARCHAR(32) DEFAULT 'member' COMMENT 'admin/member',
+    status          VARCHAR(32) DEFAULT 'pending' COMMENT 'pending/accepted/rejected/expired',
+    expire_time     DATETIME,
+    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_team_invitation_team ON team_invitation(team_id, status);
+CREATE INDEX idx_team_invitation_invitee ON team_invitation(invitee_id, status);
+
+-- 设计评论
+CREATE TABLE IF NOT EXISTS team_comment (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    team_id         BIGINT NOT NULL,
+    design_id       BIGINT NOT NULL,
+    user_id         BIGINT NOT NULL,
+    content         VARCHAR(2000) NOT NULL,
+    parent_id       BIGINT DEFAULT 0,
+    status          TINYINT DEFAULT 1,
+    deleted         TINYINT DEFAULT 0,
+    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_team_comment_design ON team_comment(design_id, create_time);
+
+-- 设计版本快照
+CREATE TABLE IF NOT EXISTS team_design_version (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    team_id         BIGINT NOT NULL,
+    design_id       BIGINT NOT NULL,
+    version_no      INT NOT NULL,
+    user_id         BIGINT NOT NULL,
+    canvas_json     CLOB NOT NULL,
+    note            VARCHAR(256),
+    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_team_design_version UNIQUE (design_id, version_no)
+);
+
+CREATE INDEX idx_team_design_version_design ON team_design_version(design_id, version_no);
+
+-- 团队协作在线状态
+CREATE TABLE IF NOT EXISTS team_presence (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    team_id         BIGINT NOT NULL,
+    user_id         BIGINT NOT NULL,
+    status          VARCHAR(32) DEFAULT 'online' COMMENT 'online/away/offline',
+    last_seen       DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_team_presence UNIQUE (team_id, user_id)
+);
+
+CREATE INDEX idx_team_presence_team ON team_presence(team_id, status);
 
 -- 企业/团队管理侧栏导航
 CREATE TABLE IF NOT EXISTS enterprise_nav (

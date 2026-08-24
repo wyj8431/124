@@ -60,6 +60,12 @@
       "put": { "tags": ["设计"], "summary": "保存画布（需登录）" },
       "delete": { "tags": ["设计"], "summary": "删除设计（需登录）" }
     },
+    "/admin/usage/quota": {
+      "get": { "tags": ["额度"], "summary": "查询每日创建、保存、导出额度（需登录）" }
+    },
+    "/admin/usage/consume": {
+      "post": { "tags": ["额度"], "summary": "消耗一次创建、保存或导出额度（需登录）" }
+    },
     "/admin/ai-tools": {
       "get": { "tags": ["AI工具"], "summary": "AI 工具列表" }
     },

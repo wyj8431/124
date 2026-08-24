@@ -1,5 +1,7 @@
 import { X, Download, Sparkles, Film, ImageIcon } from 'lucide-react'
 import type { AiGenerateResult } from '@/types'
+import { useEffect, useState } from 'react'
+import { aiApi } from '@/api'
 
 interface Props {
   result: AiGenerateResult | null
@@ -9,7 +11,23 @@ interface Props {
 export function AiGenerateResultPanel({ result, onClose }: Props) {
   if (!result) return null
 
-  const isVideo = result.outputType === 'video'
+  return <AiGenerateResultPanelBody result={result} onClose={onClose} />
+}
+
+function AiGenerateResultPanelBody({ result, onClose }: { result: AiGenerateResult; onClose: () => void }) {
+  const [current, setCurrent] = useState(result)
+  useEffect(() => {
+    if (current.status !== 0) return
+    const timer = window.setInterval(async () => {
+      try {
+        const task = await aiApi.getTask(current.taskId)
+        if (task.status !== 0) setCurrent((previous) => ({ ...previous, status: task.status, outputUrl: task.outputUrl || previous.outputUrl, message: task.errorMsg || previous.message }))
+      } catch { /* 保持当前任务状态，等待下一次轮询 */ }
+    }, 1500)
+    return () => window.clearInterval(timer)
+  }, [current.status, current.taskId])
+
+  const isVideo = current.outputType === 'video'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
@@ -18,15 +36,15 @@ export function AiGenerateResultPanel({ result, onClose }: Props) {
           <div className="flex items-center gap-2">
             {isVideo ? (
               <Film className="h-5 w-5 text-teal-500" />
-            ) : result.outputType === 'agent' ? (
+            ) : current.outputType === 'agent' ? (
               <Sparkles className="h-5 w-5 text-purple-500" />
             ) : (
               <ImageIcon className="h-5 w-5 text-orange-500" />
             )}
             <div>
-              <h3 className="text-base font-semibold text-ckt-text">{result.message}</h3>
-              {result.toolName && (
-                <p className="text-xs text-ckt-text-secondary">工具：{result.toolName}</p>
+              <h3 className="text-base font-semibold text-ckt-text">{current.status === 0 ? 'AI 任务处理中…' : current.message}</h3>
+              {current.toolName && (
+                <p className="text-xs text-ckt-text-secondary">工具：{current.toolName}</p>
               )}
             </div>
           </div>
@@ -42,7 +60,7 @@ export function AiGenerateResultPanel({ result, onClose }: Props) {
         <div className="p-5">
           <div className="relative overflow-hidden rounded-xl bg-gray-50">
             <img
-              src={result.outputUrl}
+              src={current.outputUrl}
               alt="生成结果"
               className="w-full object-cover"
               style={{ maxHeight: 360 }}
@@ -61,10 +79,10 @@ export function AiGenerateResultPanel({ result, onClose }: Props) {
             )}
           </div>
 
-          {result.steps && result.steps.length > 0 && (
+          {current.steps && current.steps.length > 0 && (
             <div className="mt-4 space-y-2">
               <p className="text-xs font-medium text-ckt-text-secondary">Agent 执行步骤</p>
-              {result.steps.map((step) => (
+              {current.steps.map((step) => (
                 <div
                   key={step.code}
                   className="flex items-start gap-2 rounded-lg bg-[#f8f9fb] px-3 py-2 text-sm"
@@ -81,14 +99,14 @@ export function AiGenerateResultPanel({ result, onClose }: Props) {
 
           <div className="mt-5 flex gap-3">
             <a
-              href={result.outputUrl}
+              href={current.outputUrl}
               target="_blank"
               rel="noreferrer"
               download
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-ckt-primary py-2.5 text-sm font-medium text-white transition hover:opacity-90"
             >
               <Download className="h-4 w-4" />
-              下载{isVideo ? '封面' : '图片'}
+              {current.status === 0 ? '等待结果' : `下载${isVideo ? '封面' : '图片'}`}
             </a>
             <button
               type="button"

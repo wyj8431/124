@@ -23,6 +23,7 @@ public class DesignService {
     private final DesignTemplateMapper templateMapper;
     private final DesignSceneMapper sceneMapper;
     private final UserRecentService userRecentService;
+    private final UsageQuotaService usageQuotaService;
 
     public PageResult<UserDesign> listByUser(Long userId, int page, int pageSize) {
         Page<UserDesign> p = designMapper.selectPage(new Page<>(page, pageSize),
@@ -41,6 +42,7 @@ public class DesignService {
 
     /** 基于模板或空白场景创建设计 — 画布 JSON 存数据库，前端编辑器实时读写 */
     public UserDesign create(Long userId, DesignCreateRequest req) {
+        usageQuotaService.consume(userId, "create");
         UserDesign design = new UserDesign();
         design.setUserId(userId);
         design.setTitle(req.getTitle() != null ? req.getTitle() : "未命名设计");
@@ -88,6 +90,7 @@ public class DesignService {
 
     public UserDesign save(Long id, Long userId, DesignSaveRequest req) {
         UserDesign design = getById(id, userId);
+        usageQuotaService.consume(userId, "save");
         if (req.getTitle() != null) design.setTitle(req.getTitle());
         if (req.getCanvasJson() != null) design.setCanvasJson(req.getCanvasJson());
         if (req.getCoverUrl() != null) design.setCoverUrl(req.getCoverUrl());

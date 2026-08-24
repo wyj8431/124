@@ -54,9 +54,9 @@ DELETE FROM user_design_folder;
 DELETE FROM my_design_nav;
 DELETE FROM sys_user WHERE id IN (1, 2);
 
-INSERT INTO sys_user (id, username, password, nickname, avatar, phone, member_level, status) VALUES
-(1, 'demo', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '演示用户', 'https://static.chuangkit.com/avatar/default.png', '15512342987', 1, 1),
-(2, 'admin', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '管理员', 'https://static.chuangkit.com/avatar/default.png', '13800138000', 2, 1);
+INSERT INTO sys_user (id, username, password, nickname, avatar, phone, system_role, member_level, status) VALUES
+(1, 'demo', '$2a$10$hhIZZOn3J85Rf3UW3b9z3uaMEo5RmUIiuUt.xsgS.DeWPBwAomlaO', '演示用户', 'https://static.chuangkit.com/avatar/default.png', '15512342987', 'user', 1, 1),
+(2, 'admin', '$2a$10$hhIZZOn3J85Rf3UW3b9z3uaMEo5RmUIiuUt.xsgS.DeWPBwAomlaO', '管理员', 'https://static.chuangkit.com/avatar/default.png', '13800138000', 'admin', 2, 1);
 
 INSERT INTO search_tab (name, code, placeholder, sort_order) VALUES
 ('设计模板', 'template', '输入关键词搜索你想要的模板或素材', 1),

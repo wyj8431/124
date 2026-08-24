@@ -17,6 +17,7 @@ public class SysUser {
     private String avatar;
     private String phone;
     private String email;
+    private String systemRole;
     private Integer memberLevel;
     private LocalDateTime memberExpire;
     private Integer status;
