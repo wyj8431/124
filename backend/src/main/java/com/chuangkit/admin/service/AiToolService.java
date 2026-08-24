@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +54,8 @@ public class AiToolService {
         task.setToolId(tool.getId());
         task.setInputParams(inputParams);
         task.setStatus(1);
-        task.setOutputUrl("https://picsum.photos/seed/ai-" + System.currentTimeMillis() + "/800/600");
+        String svg = "<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='#eef2ff'/><text x='50%' y='50%' text-anchor='middle' font-family='Arial' font-size='28' fill='#4338ca'>灵图工坊 AI 任务队列</text></svg>";
+        task.setOutputUrl("data:image/svg+xml;charset=UTF-8," + URLEncoder.encode(svg, StandardCharsets.UTF_8));
         task.setFinishTime(LocalDateTime.now());
         aiTaskMapper.insert(task);
         return Map.of(

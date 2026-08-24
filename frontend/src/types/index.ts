@@ -244,6 +244,18 @@ export interface UserDesign {
   updateTime?: string
 }
 
+export interface UsageQuota {
+  usageDate: string
+  unlimited: boolean
+  limit: number
+  createUsed: number
+  saveUsed: number
+  exportUsed: number
+  createRemaining: number
+  saveRemaining: number
+  exportRemaining: number
+}
+
 export interface RecentUsageItem {
   id: number
   targetType: 'scene' | 'template' | string

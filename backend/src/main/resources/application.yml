@@ -52,6 +52,10 @@ chuangkit:
     expiration-ms: 86400000
   upload:
     base-url: http://localhost:8081/uploads
+  ai:
+    provider: ${AI_PROVIDER:mock}
+    endpoint: ${AI_PROVIDER_ENDPOINT:}
+    api-key: ${AI_PROVIDER_API_KEY:}
   sms:
     provider: ${SMS_PROVIDER:mock}
     code-expire-minutes: 5

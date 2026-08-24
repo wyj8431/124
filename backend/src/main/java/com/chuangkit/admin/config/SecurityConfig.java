@@ -51,7 +51,8 @@ public class SecurityConfig {
                     "/admin/swagger-ui/**",
                     "/admin/v3/api-docs/**"
                 ).permitAll()
-                .requestMatchers("/admin/designs/**", "/admin/user/**", "/admin/ai-tasks/**", "/admin/my-design/**", "/admin/enterprise/**", "/admin/member/checkout/**", "/admin/order-center/**", "/admin/auth-record/**", "/admin/message-center/**", "/admin/coupon-center/**", "/admin/team-upgrade/submit").authenticated()
+                .requestMatchers("/admin/admin/**").hasRole("ADMIN")
+                .requestMatchers("/admin/designs/**", "/admin/user/**", "/admin/ai-tasks/**", "/admin/my-design/**", "/admin/enterprise/**", "/admin/member/checkout/**", "/admin/order-center/**", "/admin/auth-record/**", "/admin/message-center/**", "/admin/coupon-center/**", "/admin/team-upgrade/submit", "/admin/usage/**", "/admin/teams/**", "/admin/support/**", "/admin/device-alerts/**").authenticated()
                 .anyRequest().permitAll()
             )
             .headers(h -> h.frameOptions(f -> f.sameOrigin()))

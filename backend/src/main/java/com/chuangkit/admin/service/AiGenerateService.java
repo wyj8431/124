@@ -7,16 +7,24 @@ import com.chuangkit.admin.entity.AiTask;
 import com.chuangkit.admin.entity.AiTool;
 import com.chuangkit.admin.mapper.AiTaskMapper;
 import com.chuangkit.admin.mapper.AiToolMapper;
+import com.chuangkit.admin.mapper.AiProviderMapper;
+import com.chuangkit.admin.entity.AiProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -25,6 +33,7 @@ public class AiGenerateService {
 
     private final AiTaskMapper aiTaskMapper;
     private final AiToolMapper aiToolMapper;
+    private final AiProviderMapper aiProviderMapper;
 
     @Value("${chuangkit.upload.base-url:http://localhost:8081/uploads}")
     private String uploadBaseUrl;
@@ -105,8 +114,7 @@ public class AiGenerateService {
         task.setUserId(userId != null ? userId : 1L);
         task.setToolId(tool.getId());
         task.setInputParams(buildInputJson(req));
-        task.setStatus(1);
-        task.setFinishTime(LocalDateTime.now());
+        task.setStatus(0);
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("mode", mode);
@@ -116,13 +124,13 @@ public class AiGenerateService {
         switch (mode) {
             case "image_gen" -> {
                 int[] size = parseAspectSize(req.getAspectRatio());
-                String url = "https://picsum.photos/seed/img-" + seed + "/" + size[0] + "/" + size[1];
+                String url = previewSvg("图片生成中", req.getPrompt(), size[0], size[1]);
                 task.setOutputUrl(url);
                 result.put("outputType", "image");
                 result.put("outputUrl", url);
             }
             case "video_gen" -> {
-                String cover = "https://picsum.photos/seed/vid-" + seed + "/720/720";
+                String cover = previewSvg("视频任务排队中", req.getPrompt(), 720, 720);
                 task.setOutputUrl(cover);
                 result.put("outputType", "video");
                 result.put("outputUrl", cover);
@@ -131,7 +139,7 @@ public class AiGenerateService {
             }
             default -> {
                 int[] size = parseAspectSize(req.getAspectRatio());
-                String url = "https://picsum.photos/seed/agent-" + seed + "/" + size[0] + "/" + size[1];
+                String url = previewSvg("Agent 任务排队中", req.getPrompt(), size[0], size[1]);
                 task.setOutputUrl(url);
                 result.put("outputType", "agent");
                 result.put("outputUrl", url);
@@ -142,8 +150,48 @@ public class AiGenerateService {
         aiTaskMapper.insert(task);
         result.put("taskId", task.getId());
         result.put("status", task.getStatus());
+        processAsync(task, req);
         return result;
     }
+
+    private void processAsync(AiTask task, AiGenerateRequest req) {
+        Thread.startVirtualThread(() -> {
+            try {
+                AiProvider provider = aiProviderMapper.selectOne(new LambdaQueryWrapper<AiProvider>()
+                    .eq(AiProvider::getEnabled, 1).orderByAsc(AiProvider::getId).last("LIMIT 1"));
+                if (provider != null && provider.getEndpoint() != null && !provider.getEndpoint().isBlank()) {
+                    String output = invokeProvider(provider, req);
+                    task.setOutputUrl(output);
+                }
+                task.setStatus(1); task.setFinishTime(LocalDateTime.now()); task.setErrorMsg(null);
+            } catch (Exception ex) {
+                task.setStatus(2); task.setErrorMsg(ex.getMessage() == null ? "AI Provider 调用失败" : truncate(ex.getMessage(), 500)); task.setFinishTime(LocalDateTime.now());
+            }
+            aiTaskMapper.updateById(task);
+        });
+    }
+
+    private String invokeProvider(AiProvider provider, AiGenerateRequest req) throws Exception {
+        String key = provider.getApiKeyEnv() == null ? null : System.getenv(provider.getApiKeyEnv());
+        String body = "{\"model\":\"" + json(provider.getModel()) + "\",\"prompt\":\"" + json(req.getPrompt()) + "\",\"mode\":\"" + json(req.getMode()) + "\"}";
+        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(provider.getEndpoint())).header("Content-Type", "application/json");
+        if (key != null && !key.isBlank()) builder.header("Authorization", "Bearer " + key);
+        HttpResponse<String> response = HttpClient.newHttpClient().send(builder.POST(HttpRequest.BodyPublishers.ofString(body)).build(), HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() / 100 != 2) throw new IOException("Provider HTTP " + response.statusCode());
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\\"outputUrl\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"").matcher(response.body());
+        if (!matcher.find()) throw new IOException("Provider 响应缺少 outputUrl");
+        return matcher.group(1);
+    }
+
+    private String json(String value) { return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\""); }
+
+    private String previewSvg(String title, String prompt, int width, int height) {
+        String text = title + " - " + truncate(prompt, 28);
+        String svg = "<svg xmlns='http://www.w3.org/2000/svg' width='" + width + "' height='" + height + "'><rect width='100%' height='100%' fill='#eef2ff'/><text x='50%' y='46%' text-anchor='middle' font-family='Arial,sans-serif' font-size='28' fill='#4338ca'>" + escapeXml(text) + "</text><text x='50%' y='56%' text-anchor='middle' font-family='Arial,sans-serif' font-size='16' fill='#64748b'>灵图工坊 AI 任务队列</text></svg>";
+        return "data:image/svg+xml;charset=UTF-8," + URLEncoder.encode(svg, StandardCharsets.UTF_8);
+    }
+
+    private String escapeXml(String value) { return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&apos;"); }
 
     public Map<String, Object> upload(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {

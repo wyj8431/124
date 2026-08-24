@@ -1,0 +1,16 @@
+:root { font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif; color: #1f2937; background: #f5f7fa; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 1000px; }
+.login-page { min-height: 100vh; display: grid; place-items: center; background: #f3f6fb; }
+.login-card { width: 380px; }
+.login-brand { color: #0773fc; font-size: 24px; font-weight: 700; text-align: center; }
+.login-subtitle { margin: 8px 0 26px; color: #6b7280; text-align: center; }
+.login-button { width: 100%; }
+.admin-page { min-height: 100vh; background: #f5f7fa; }
+.admin-header { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; background: #fff; border-bottom: 1px solid #e5e7eb; }
+.admin-header strong { margin-right: 16px; font-size: 18px; }
+.admin-header span { color: #9ca3af; font-size: 13px; }
+.admin-content { padding: 32px; }
+.page-heading { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+.page-heading h1 { margin: 0 0 8px; font-size: 24px; }
+.page-heading p { margin: 0; color: #6b7280; }

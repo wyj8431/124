@@ -66,6 +66,7 @@ public class AuthDto {
         private String avatar;
         private Integer memberLevel;
         private String memberLevelName;
+        private String systemRole;
 
         public static UserInfo from(com.chuangkit.admin.entity.SysUser u) {
             UserInfo info = new UserInfo();
@@ -74,6 +75,7 @@ public class AuthDto {
             info.nickname = u.getNickname();
             info.avatar = u.getAvatar();
             info.memberLevel = u.getMemberLevel();
+            info.systemRole = u.getSystemRole() == null ? "user" : u.getSystemRole();
             info.memberLevelName = switch (u.getMemberLevel() != null ? u.getMemberLevel() : 0) {
                 case 1 -> "VIP会员";
                 case 2 -> "团队版";
