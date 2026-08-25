@@ -29,6 +29,16 @@ import type {
   MyDesignFolder,
 } from '@/types/myDesign'
 
+export class ApiError extends Error {
+  readonly code: number
+
+  constructor(message: string, code: number) {
+    super(message)
+    this.name = 'ApiError'
+    this.code = code
+  }
+}
+
 const api = axios.create({
   baseURL: '/admin',
   timeout: 15000,
@@ -46,13 +56,14 @@ api.interceptors.response.use(
   (res) => {
     const body = res.data as ApiResult<unknown>
     if (body.code !== 200) {
-      return Promise.reject(new Error(body.message || '请求失败'))
+      return Promise.reject(new ApiError(body.message || '请求失败', body.code))
     }
     return res
   },
   (err) => {
-    const msg = err.response?.data?.message
-    return Promise.reject(new Error(msg || err.message || '网络请求失败'))
+    const response = err.response?.data as Partial<ApiResult<unknown>> | undefined
+    const msg = response?.message
+    return Promise.reject(new ApiError(msg || err.message || '网络请求失败', response?.code || err.response?.status || 500))
   },
 )
 
@@ -227,6 +238,7 @@ export const designApi = {
   save: (id: number, data: {
     title?: string
     canvasJson?: string
+    revision?: number
     coverUrl?: string
     width?: number
     height?: number
@@ -377,6 +389,55 @@ export const enterpriseApi = {
   getAccountOverview: () =>
     api
       .get<ApiResult<import('@/types/enterprise').EnterpriseAccountOverview>>('/enterprise/account-overview')
+      .then(unwrap),
+}
+
+export const teamApi = {
+  getCurrent: () =>
+    api.get<ApiResult<import('@/types/team').TeamOverview>>('/teams/current').then(unwrap),
+  get: (teamId: number) =>
+    api.get<ApiResult<import('@/types/team').TeamOverview>>(`/teams/${teamId}`).then(unwrap),
+  getMembers: (teamId: number) =>
+    api.get<ApiResult<import('@/types/team').TeamMember[]>>(`/teams/${teamId}/members`).then(unwrap),
+  invite: (teamId: number, data: { email?: string; userId?: number; role?: string }) =>
+    api
+      .post<ApiResult<import('@/types/team').TeamInvitation>>(`/teams/${teamId}/invitations`, data)
+      .then(unwrap),
+  getInvitations: (teamId: number) =>
+    api
+      .get<ApiResult<import('@/types/team').TeamInvitation[]>>(`/teams/${teamId}/invitations`)
+      .then(unwrap),
+  updateRole: (teamId: number, targetUserId: number, role: 'admin' | 'member') =>
+    api
+      .put<ApiResult<import('@/types/team').TeamMember>>(`/teams/${teamId}/members/${targetUserId}/role`, { role })
+      .then(unwrap),
+  removeMember: (teamId: number, targetUserId: number) =>
+    api.delete<ApiResult<void>>(`/teams/${teamId}/members/${targetUserId}`).then(unwrap),
+  getPresence: (teamId: number) =>
+    api
+      .get<ApiResult<import('@/types/team').TeamPresence[]>>(`/teams/${teamId}/presence`)
+      .then(unwrap),
+  updatePresence: (teamId: number, status: 'online' | 'away' | 'offline') =>
+    api
+      .put<ApiResult<import('@/types/team').TeamPresence>>(`/teams/${teamId}/presence`, { status })
+      .then(unwrap),
+  getComments: (teamId: number, designId: number) =>
+    api
+      .get<ApiResult<import('@/types/team').TeamComment[]>>(`/teams/${teamId}/designs/${designId}/comments`)
+      .then(unwrap),
+  addComment: (teamId: number, designId: number, data: { content: string; parentId?: number }) =>
+    api
+      .post<ApiResult<import('@/types/team').TeamComment>>(`/teams/${teamId}/designs/${designId}/comments`, data)
+      .then(unwrap),
+  removeComment: (teamId: number, commentId: number) =>
+    api.delete<ApiResult<void>>(`/teams/${teamId}/comments/${commentId}`).then(unwrap),
+  getVersions: (teamId: number, designId: number) =>
+    api
+      .get<ApiResult<import('@/types/team').TeamVersion[]>>(`/teams/${teamId}/designs/${designId}/versions`)
+      .then(unwrap),
+  createVersion: (teamId: number, designId: number, data: { canvasJson: string; note?: string }) =>
+    api
+      .post<ApiResult<import('@/types/team').TeamVersion>>(`/teams/${teamId}/designs/${designId}/versions`, data)
       .then(unwrap),
 }
 

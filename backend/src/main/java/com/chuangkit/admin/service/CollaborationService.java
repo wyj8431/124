@@ -25,6 +25,7 @@ public class CollaborationService {
     private final TeamPresenceMapper presenceMapper;
     private final SysUserMapper userMapper;
     private final UserDesignMapper designMapper;
+    private final UserMessageMapper messageMapper;
 
     public TeamOverviewDto currentTeam(Long userId) {
         TeamMember membership = membershipForUser(userId);
@@ -163,12 +164,23 @@ public class CollaborationService {
             .stream().map(this::toComment).toList();
     }
 
+    @Transactional
     public TeamComment addComment(Long teamId, Long designId, Long userId, TeamCommentRequest request) {
         verifyDesignAccess(teamId, designId, userId);
+        UserDesign design = designMapper.selectById(designId);
+        TeamComment parentComment = findParentComment(teamId, designId, request.getParentId());
         TeamComment comment = new TeamComment(); comment.setTeamId(teamId); comment.setDesignId(designId);
         comment.setUserId(userId); comment.setContent(request.getContent().trim());
         comment.setParentId(request.getParentId() == null ? 0L : request.getParentId()); comment.setStatus(1);
-        commentMapper.insert(comment); return comment;
+        commentMapper.insert(comment);
+        if (parentComment == null) {
+            notifyTeamMembers(teamId, userId, designId, design, "团队评论更新",
+                "有成员在这个设计中发布了新评论", "评论内容：" + comment.getContent());
+        } else {
+            notifyUser(parentComment.getUserId(), userId, designId, design, "评论被回复",
+                "你的评论收到了一条新回复", "回复内容：" + comment.getContent());
+        }
+        return comment;
     }
 
     @Transactional
@@ -192,12 +204,16 @@ public class CollaborationService {
     @Transactional
     public TeamVersionDto createVersion(Long teamId, Long designId, Long userId, TeamVersionRequest request) {
         verifyDesignAccess(teamId, designId, userId);
+        UserDesign design = designMapper.selectById(designId);
         Integer latest = versionMapper.selectList(new LambdaQueryWrapper<TeamDesignVersion>()
             .eq(TeamDesignVersion::getDesignId, designId).orderByDesc(TeamDesignVersion::getVersionNo).last("LIMIT 1"))
             .stream().findFirst().map(TeamDesignVersion::getVersionNo).orElse(0);
         TeamDesignVersion version = new TeamDesignVersion(); version.setTeamId(teamId); version.setDesignId(designId);
         version.setVersionNo(latest + 1); version.setUserId(userId); version.setCanvasJson(request.getCanvasJson()); version.setNote(request.getNote());
-        versionMapper.insert(version); return toVersion(version);
+        versionMapper.insert(version);
+        notifyTeamMembers(teamId, userId, designId, design, "新版本快照已创建",
+            "团队成员创建了新的设计版本快照", request.getNote());
+        return toVersion(version);
     }
 
     @Transactional
@@ -223,6 +239,53 @@ public class CollaborationService {
         if (design == null) throw new BusinessException("设计不存在");
         TeamMember ownerMembership = membershipForUserInTeam(teamId, design.getUserId());
         if (ownerMembership == null) throw new BusinessException(403, "设计不属于当前团队");
+    }
+
+    private void notifyTeamMembers(Long teamId, Long actorId, Long designId, UserDesign design,
+                                   String title, String summary, String detail) {
+        List<TeamMember> members = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>()
+            .eq(TeamMember::getTeamId, teamId).eq(TeamMember::getStatus, 1));
+        for (TeamMember member : members) {
+            notifyUser(member.getUserId(), actorId, designId, design, title, summary, detail);
+        }
+    }
+
+    private void notifyUser(Long recipientId, Long actorId, Long designId, UserDesign design,
+                            String title, String summary, String detail) {
+        if (recipientId == null || Objects.equals(recipientId, actorId)) return;
+        String designTitle = StringUtils.hasText(design.getTitle()) ? design.getTitle() : "未命名设计";
+        String safeDesignTitle = escapeHtml(designTitle);
+        String safeDetail = escapeHtml(detail);
+        UserMessage message = new UserMessage();
+        message.setUserId(recipientId);
+        message.setCategory("collaboration");
+        message.setTitle(title);
+        message.setSummary(summary + "：" + designTitle);
+        message.setContent("<p>设计：" + safeDesignTitle + "</p>" +
+            (StringUtils.hasText(detail) ? "<p>" + safeDetail + "</p>" : ""));
+        message.setLinkUrl("/editor/" + designId);
+        message.setLinkText("打开设计");
+        message.setIsRead(0);
+        message.setStatus(1);
+        message.setCreateTime(LocalDateTime.now());
+        messageMapper.insert(message);
+    }
+
+    private TeamComment findParentComment(Long teamId, Long designId, Long parentId) {
+        if (parentId == null || parentId == 0) return null;
+        if (parentId < 0) throw new BusinessException("回复的评论不存在");
+        TeamComment parent = commentMapper.selectById(parentId);
+        if (parent == null || !teamId.equals(parent.getTeamId()) || !designId.equals(parent.getDesignId())
+            || !Objects.equals(parent.getStatus(), 1)) {
+            throw new BusinessException("回复的评论不存在");
+        }
+        return parent;
+    }
+
+    private String escapeHtml(String value) {
+        return value == null ? "" : value.replace("&", "&amp;")
+            .replace("<", "&lt;").replace(">", "&gt;")
+            .replace("\"", "&quot;").replace("'", "&#39;");
     }
 
     private TeamMember membershipForUser(Long userId) {

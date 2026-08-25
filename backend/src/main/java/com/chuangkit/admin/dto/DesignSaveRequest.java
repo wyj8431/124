@@ -8,6 +8,7 @@ public class DesignSaveRequest {
     private Long sceneId;
     private Long templateId;
     private String canvasJson;
+    private Long revision;
     private Integer width;
     private Integer height;
     private String coverUrl;

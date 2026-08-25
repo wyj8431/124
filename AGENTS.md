@@ -7,3 +7,32 @@ Before starting any coding, debugging, testing, design, document, or infrastruct
 Use available MCP tools proactively when they provide a direct capability for the task. Prefer browser or Playwright MCP for page inspection and visual verification, use the relevant design MCP for design-source work, and use file, database, or service MCP tools when they are the authoritative integration path.
 
 Use sub-agents proactively only when the task has independent, bounded parts that can be completed safely in parallel. Do not delegate overlapping file edits. Keep ownership and verification explicit, then review the combined result before declaring completion.
+
+## Before Work
+
+- Read the repository guidance and the relevant installed skills before changing code.
+- Every multi-step task, including features, refactors, documentation, and infrastructure work, must leave a design document under `docs/superpowers/specs/` and an implementation plan under `docs/superpowers/plans/` before implementation.
+- For every multi-step task, including features, refactors, documentation, and infrastructure work, follow this sequence: `superpowers:brainstorming` -> user confirmation -> `superpowers:writing-plans`.
+- Treat the approved plan and the user's latest request as the source of truth. Do not infer unrelated scope.
+
+## Implementation Contract
+
+- Use `superpowers:test-driven-development` before implementation for behavior changes and test changes; keep the smallest useful failing test, implementation, and regression coverage.
+- Make minimal, reversible changes. Preserve existing user changes, repository conventions, public contracts, and data. Never reset or overwrite unrelated work.
+- Keep secrets, credentials, generated artifacts, and machine-local files out of commits. Use existing APIs, helpers, and dependency versions before introducing new abstractions.
+- For high-risk changes (authentication, authorization, payments, data migrations, destructive operations, security boundaries, or shared infrastructure), provide regression tests, a concise risk note, and explicit human review evidence in the delivery record.
+
+## Verification Contract
+
+- Before completion, use `superpowers:verification-before-completion` and run the repository quality gate:
+
+  `pwsh -File scripts/quality-gate.ps1`
+
+- Report the exact commands and results, including any skipped check and why. Do not claim completion from inspection alone.
+- Every delivery must include or update the engineering standard at `docs/engineering/ai-code-standard.md` when the standard is affected, plus a delivery record describing scope, risks, tests, and review evidence.
+
+## Collaboration
+
+- Use `superpowers:subagent-driven-development` for approved multi-step plans when independent tasks can be isolated; otherwise use `superpowers:executing-plans` inline.
+- Assign clear file ownership to sub-agents, review their changes, and run the full quality gate after integration.
+- Keep commits focused and auditable; do not mix governance work with unrelated product changes.

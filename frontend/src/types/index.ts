@@ -240,6 +240,7 @@ export interface UserDesign {
   width?: number
   height?: number
   canvasJson?: string
+  revision?: number
   status?: number
   updateTime?: string
 }

@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS user_design (
     template_id     BIGINT COMMENT '基于哪个模板创建，空白则为空',
     folder_id       BIGINT COMMENT '所属文件夹',
     canvas_json     CLOB NOT NULL COMMENT '用户编辑后的画布 JSON',
+    revision        BIGINT DEFAULT 1 COMMENT '乐观锁版本号',
     width           INT,
     height          INT,
     status          TINYINT DEFAULT 1 COMMENT '1草稿 2已完成',

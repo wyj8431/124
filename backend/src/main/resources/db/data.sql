@@ -887,6 +887,8 @@ UPDATE design_template SET scene_id = (SELECT id FROM design_scene WHERE code = 
 
 -- 兼容 H2 持久化库：补齐 my-design 相关字段/表
 ALTER TABLE user_design ADD COLUMN IF NOT EXISTS folder_id BIGINT;
+ALTER TABLE user_design ADD COLUMN IF NOT EXISTS revision BIGINT DEFAULT 1;
+UPDATE user_design SET revision = 1 WHERE revision IS NULL;
 
 ALTER TABLE team ADD COLUMN IF NOT EXISTS max_members INT DEFAULT 20;
 ALTER TABLE team ADD COLUMN IF NOT EXISTS version_type VARCHAR(32) DEFAULT 'free';

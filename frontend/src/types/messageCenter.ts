@@ -1,5 +1,7 @@
+export type MessageCenterCategoryCode = 'all' | 'system' | 'activity' | 'order' | 'collaboration'
+
 export interface MessageCenterCategory {
-  code: string
+  code: MessageCenterCategoryCode
   name: string
   unreadCount: number
 }
@@ -13,7 +15,7 @@ export interface MessageCenterIndexData {
 
 export interface MessageCenterMessage {
   id: number
-  category: string
+  category: Exclude<MessageCenterCategoryCode, 'all'> | string
   categoryLabel: string
   title: string
   summary?: string

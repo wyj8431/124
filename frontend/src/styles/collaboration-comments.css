@@ -1,0 +1,42 @@
+.design-editor-comment-compose-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.design-editor-reply-target {
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-left: 3px solid #60a5fa;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 12px;
+}
+
+.design-editor-reply-target span {
+  font-weight: 600;
+}
+
+.design-editor-reply-target p {
+  margin: 3px 0 0;
+  overflow: hidden;
+  color: #475569;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-editor-comment-cancel,
+.design-editor-comment-reply {
+  color: #6b7280;
+}
+
+.design-editor-comment-cancel:hover,
+.design-editor-comment-reply:hover {
+  color: #2563eb;
+}
+
+.design-editor-comment.is-reply {
+  margin-left: 16px;
+  border-left: 3px solid #bfdbfe;
+}

@@ -1,6 +1,7 @@
 package com.chuangkit.admin.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chuangkit.admin.common.GlobalExceptionHandler.BusinessException;
 import com.chuangkit.admin.common.PageResult;
@@ -14,6 +15,7 @@ import com.chuangkit.admin.mapper.DesignTemplateMapper;
 import com.chuangkit.admin.mapper.UserDesignMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +50,7 @@ public class DesignService {
         design.setTitle(req.getTitle() != null ? req.getTitle() : "未命名设计");
         design.setSceneId(req.getSceneId());
         design.setTemplateId(req.getTemplateId());
+        design.setRevision(1L);
         design.setStatus(1);
 
         if (req.getTemplateId() != null) {
@@ -88,17 +91,31 @@ public class DesignService {
         return design;
     }
 
+    @Transactional
     public UserDesign save(Long id, Long userId, DesignSaveRequest req) {
         UserDesign design = getById(id, userId);
+        long currentRevision = design.getRevision() == null ? 1L : design.getRevision();
+        if (req.getRevision() != null && !req.getRevision().equals(currentRevision)) {
+            throw new BusinessException(409, "设计已被其他成员修改，请重新加载后再保存");
+        }
         usageQuotaService.consume(userId, "save");
-        if (req.getTitle() != null) design.setTitle(req.getTitle());
-        if (req.getCanvasJson() != null) design.setCanvasJson(req.getCanvasJson());
-        if (req.getCoverUrl() != null) design.setCoverUrl(req.getCoverUrl());
-        if (req.getWidth() != null) design.setWidth(req.getWidth());
-        if (req.getHeight() != null) design.setHeight(req.getHeight());
-        if (req.getStatus() != null) design.setStatus(req.getStatus());
-        designMapper.updateById(design);
-        return design;
+        UserDesign updates = new UserDesign();
+        updates.setId(id);
+        updates.setRevision(currentRevision + 1);
+        if (req.getTitle() != null) updates.setTitle(req.getTitle());
+        if (req.getCanvasJson() != null) updates.setCanvasJson(req.getCanvasJson());
+        if (req.getCoverUrl() != null) updates.setCoverUrl(req.getCoverUrl());
+        if (req.getWidth() != null) updates.setWidth(req.getWidth());
+        if (req.getHeight() != null) updates.setHeight(req.getHeight());
+        if (req.getStatus() != null) updates.setStatus(req.getStatus());
+        int updated = designMapper.update(updates, new LambdaUpdateWrapper<UserDesign>()
+            .eq(UserDesign::getId, id)
+            .eq(UserDesign::getUserId, userId)
+            .eq(UserDesign::getRevision, currentRevision));
+        if (updated != 1) {
+            throw new BusinessException(409, "设计已被其他成员修改，请重新加载后再保存");
+        }
+        return getById(id, userId);
     }
 
     public void delete(Long id, Long userId) {
