@@ -3,8 +3,8 @@
 ## Scope
 
 - Request: Make AI-assisted code changes conform to an auditable enterprise engineering standard, requiring the available `superpowers` workflow and an honest `claude-code-everything` integration status.
-- In scope: Repository agent contracts, engineering standard, delivery record template, React test entry point, Vue admin build permission, shared local quality gate, high-risk PR evidence check, PR template, and GitHub Actions workflow.
-- Explicitly out of scope: Product behavior, the main worktree's uncommitted collaboration feature, remote GitHub branch-protection administration, and installation of unavailable third-party plugins.
+- In scope: Repository agent contracts, engineering standard, delivery record template, React test entry point, Vue admin build permission, shared local quality gate, high-risk PR evidence check, PR template, GitHub Actions workflow, and the reviewed collaboration revision dependency required for the full gate.
+- Explicitly out of scope: The main worktree's unrelated uncommitted product work, remote GitHub branch-protection administration, and installation of unavailable third-party plugins.
 
 ## Design Decisions
 
@@ -13,44 +13,43 @@
 
 ## Changed Files and Risk Boundary
 
-- Files: `AGENTS.md`, `CLAUDE.md`, `docs/engineering/*`, `docs/superpowers/*`, `frontend/package.json`, `frontend/test/package-scripts.test.mjs`, `admin-web/pnpm-workspace.yaml`, `scripts/*quality-gate*`, `scripts/*risk-evidence*`, `.github/pull_request_template.md`, and `.github/workflows/quality-gate.yml`.
-- Risk classification: high. The change adds CI and repository governance controls.
+- Files: `AGENTS.md`, `CLAUDE.md`, `docs/engineering/*`, `docs/superpowers/*`, `frontend/package.json`, `frontend/test/package-scripts.test.mjs`, `admin-web/pnpm-workspace.yaml`, `scripts/*quality-gate*`, `scripts/*risk-evidence*`, `.github/pull_request_template.md`, `.github/workflows/quality-gate.yml`, `frontend/src/api/index.ts`, `frontend/src/types/index.ts`, `frontend/src/types/team.ts`, `backend/src/main/java/com/chuangkit/admin/{dto/DesignSaveRequest.java,entity/UserDesign.java,service/DesignService.java}`, `backend/src/main/resources/db/{schema.sql,data.sql}`, and `backend/src/test/java/com/chuangkit/admin/service/DesignServiceTest.java`.
+- Risk classification: high. The change adds CI and repository governance controls and changes an API/service/database save path.
 
 ## Verification
 
 | Command | Result | Notes |
 | --- | --- | --- |
-| `pwsh -NoProfile -Command "Invoke-Pester scripts/test-quality-gate.Tests.ps1"` | PASS | 5 passed, 0 failed. Covers eight stages, named runtime preflights, missing-Node reporting, multiple PATH candidates, and JDK resolution through a Java PATH shim. |
-| `pwsh -NoProfile -Command "Invoke-Pester scripts/test-check-risk-evidence.Tests.ps1"` | PASS | 4 passed, 0 failed. Covers incomplete and complete PR bodies, comment-only evidence rejection, and Git enumeration failure. |
-| `pnpm --dir admin-web install --frozen-lockfile` | PASS | pnpm 11.3.0; the tracked `esbuild` permission enables installation. |
-| `pnpm --dir admin-web run build` | PASS | Vite built successfully; it emitted a non-failing large-chunk warning. |
-| `backend\\mvnw.cmd -q test` with `JAVA_HOME` derived from `java.home` | PASS | The main worktree's Maven test suite passed with Java 21. |
-| `pwsh -NoProfile -File scripts/quality-gate.ps1` | FAIL | Stopped at React frontend tests: 5 passed, 1 failed because `frontend/src/types/team.ts` is absent from this isolated branch baseline. Remaining gate stages did not run by design. |
+| `Invoke-Pester scripts/test-quality-gate.Tests.ps1, scripts/test-check-risk-evidence.Tests.ps1` | PASS | 9 passed, 0 failed. Covers eight gate stages, runtime preflights, missing Node reporting, Java home resolution, incomplete evidence, comment-only evidence rejection, and Git enumeration failure. |
+| `node --test test/design-editor-collaboration.test.mjs test/collaboration-notifications.test.mjs` | PASS | 9 passed, 0 failed. Covers collaboration API/types, editor conflict handling, remote revision notices, comments, versions, and notifications. |
+| `backend\\mvnw.cmd -q -Dtest=DesignServiceTest test` with `JAVA_HOME=D:\\Program Files\\Java\\jdk-21.0.12` | PASS | The stale-revision rejection test passed under Java 21. |
+| Authenticated local API smoke test on temporary H2 at `http://127.0.0.1:18081` | PASS | Create returned revision 1; the first save returned revision 2; a second save using revision 1 returned business code 409. The test server was stopped and port 18081 was released. |
+| `pwsh -NoProfile -File scripts/quality-gate.ps1` | PASS | Exit code 0 and `QUALITY GATE PASSED`. Ran whitespace, runtime preflights, React install/lint/tests/build, Vue admin install/build, and Maven tests. |
 
-- Commit range: `718fa48..d4fbe20`.
+- Commit range: `718fa48..34c8087`.
 - Runtime versions: Node.js `v22.22.2`; npm `10.9.7`; pnpm `11.3.0`; Java `21.0.12`; Pester `3.4.0`.
 - CI run or pull-request link: No remote CI run or pull request has been created from this local branch.
-- Stage-level results: `git diff --check`, frontend `npm ci --ignore-scripts`, and frontend lint passed during the complete gate. Lint exited 0 with 9 existing warnings. Frontend tests failed for the isolated-branch baseline issue above; frontend build, admin-web, and Maven stages were therefore skipped in that run. The main worktree's business implementation separately passed 31 Node tests, a Vite build, and Maven tests after deriving `JAVA_HOME` from Java's `java.home` setting.
+- Stage-level results: all quality-gate stages passed. React lint exited 0 with 9 existing warnings. React and Vue Vite builds emitted non-failing large-chunk warnings; React also emitted a non-failing future native-config-loader warning. Maven emitted non-failing JDK dynamic-agent warnings.
 
 ## Affected Cross-Layer Flow Evidence
 
-- Flow: None. This change adds governance tooling and does not change login, design save, or collaboration behavior.
-- Why this flow is affected: No product cross-layer flow is affected.
-- Exact API or browser smoke-test command: Not run because no product flow changed.
-- Environment and test data: Not applicable.
-- Result and failure details: Not applicable.
+- Flow: Authenticated design create and save with optimistic revision control.
+- Why this flow is affected: The reviewed collaboration dependency adds a `revision` field to the frontend API/type, DTO, entity, schema, compatibility migration, and `DesignService.save` update condition.
+- Exact API or browser smoke-test command: PowerShell `Invoke-RestMethod` calls against a temporary H2-backed Spring Boot server on port 18081: register a generated test user, `POST /admin/designs`, then two `PUT /admin/designs/{id}` calls carrying revision 1.
+- Environment and test data: Isolated in-memory H2 database named `design_revision_smoke`; generated user and design only; no production or persistent database used.
+- Result and failure details: Create returned revision 1, first save returned revision 2, and stale save returned response body code 409. No failure occurred; the temporary server was stopped after the test.
 
 ## Residual Risk and Unverified Work
 
 - External integrations not verified: GitHub Actions has not run remotely; remote default-branch protection, required reviewer policy, stale-approval dismissal, and bypass restrictions have not been inspected or configured in this local workspace.
-- Follow-up risk: The full quality gate cannot pass until the missing collaboration type/API files from the main worktree are integrated through their own reviewed change. The main worktree has extensive unrelated uncommitted changes, so they were not copied into this governance branch. `claude-code-everything` remains unavailable and must not be represented as installed.
+- Follow-up risk: Remote CI and repository branch protection still need inspection and enforcement. The collaboration revision path uses a response-body 409 with HTTP 200 to preserve the existing `Result` contract; external clients must continue checking the body code. `claude-code-everything` remains unavailable and must not be represented as installed.
 
 ## High-Risk Evidence
 
 - Threat surface and authorization impact: CI and repository instructions govern what can merge; a weak gate or fabricated PR evidence could allow unreviewed high-risk changes. The checker requires evidence content, rejects comment-only entries, and the standard requires remote branch protection.
-- Data migration and compatibility window: No database schema or public API migration is included. The existing frontend/backend contracts are unchanged.
-- Rollback procedure: Revert the governance commits from `cf0f61b` through `d4fbe20` in reverse order after restoring the prior repository instructions and CI policy; do not delete delivery evidence.
-- Regression test name and result: `quality-gate contract` passed 5/5; `check-risk-evidence` passed 4/4.
+- Data migration and compatibility window: `user_design.revision` defaults to 1 in the schema, while `data.sql` adds it with `IF NOT EXISTS` and backfills null rows to 1 for existing H2 databases. Clients that omit revision remain compatible; clients that send a stale revision receive body code 409.
+- Rollback procedure: Revert the governance commits and `34c8087` in reverse order after restoring the prior repository instructions and CI policy. Apply the rollback only after confirming clients no longer rely on revision conflict responses; retain the additive database column until compatibility review approves its removal.
+- Regression test name and result: `quality-gate contract` plus `check-risk-evidence` passed 9/9; `DesignServiceTest.rejectsSavingWithStaleRevisionBeforeConsumingQuota` passed; the authenticated API smoke test returned the expected 409 for stale revision.
 - Human reviewer and approval: Pending. This high-risk branch must not merge until a qualified human approves it.
 - Reviewer identity: Not yet assigned.
 - Review timestamp: Not yet available.
