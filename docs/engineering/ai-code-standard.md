@@ -58,6 +58,8 @@ The only local entry point is `scripts/quality-gate.ps1`. It runs eight required
 
 GitHub Actions invokes the same script on pushes and pull requests. Pull requests that touch high-risk paths must also satisfy the evidence check and receive human approval.
 
+Repository administrators must enforce that policy in the remote GitHub repository before merge: protect the default branch, require the `quality-gate` workflow to pass, require at least one approving review from someone other than the author, dismiss stale approvals after new commits, and limit bypasses to the documented emergency process. Repository files cannot configure those remote branch-protection settings; their configured state must be recorded in the high-risk delivery record.
+
 ## Delivery Checklist
 
 - Scope and non-goals are stated.
