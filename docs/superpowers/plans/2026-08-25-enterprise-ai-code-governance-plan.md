@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add an auditable, model-independent AI coding workflow and enforce the repository's frontend, backend, and high-risk change quality gates locally and in GitHub Actions.
+**Goal:** Add an auditable, model-independent AI coding workflow and enforce the repository's React frontend, Vue admin frontend, backend, and high-risk change quality gates locally and in GitHub Actions.
 
 **Architecture:** Repository instructions provide one workflow for Codex and Claude Code, while a standards document defines the human-facing engineering contract. A single PowerShell command runs the deterministic local checks; GitHub Actions invokes that same command and adds a pull-request evidence check for high-risk files.
 
-**Tech Stack:** Markdown repository rules, PowerShell 7, Node.js test runner, npm lockfile, oxlint, Vite/TypeScript, Java 21, Maven Wrapper, GitHub Actions.
+**Tech Stack:** Markdown repository rules, PowerShell 7, Node.js test runner, npm and pnpm lockfiles, oxlint, Vite/TypeScript, Java 21, Maven Wrapper, GitHub Actions.
 
 ---
 
@@ -17,7 +17,9 @@
 - Create `docs/engineering/ai-code-standard.md`: complete engineering standard, delivery record requirements, risk classification, testing, security, observability, and review checklist.
 - Create `docs/engineering/ai-delivery-record-template.md`: copyable evidence template for every non-trivial AI-assisted change.
 - Modify `frontend/package.json`: add the canonical Node test command while preserving existing scripts and dependency versions.
-- Create `scripts/quality-gate.ps1`: deterministic local gate that runs the six required checks in order and exits non-zero on the first failure.
+- Create `frontend/test/package-scripts.test.mjs`: lock the canonical test command before adding it to `package.json`.
+- Modify `admin-web/pnpm-workspace.yaml`: explicitly allow the tracked `esbuild` build script so frozen installation and production build can run.
+- Create `scripts/quality-gate.ps1`: deterministic local gate that runs the React frontend, Vue admin frontend, and backend checks in order and exits non-zero on the first failure.
 - Create `scripts/check-risk-evidence.ps1`: detects high-risk files and validates the required sections in a pull-request body; supports local changed-file inspection without requiring GitHub metadata.
 - Create `.github/pull_request_template.md`: requires scope, design, risk, verification, and human-review evidence.
 - Create `.github/workflows/quality-gate.yml`: runs Node and Java 21 setup, the shared local gate, and high-risk PR evidence validation on push and pull request events.
@@ -239,8 +241,37 @@ Expected: only the two engineering documents are included.
 
 **Files:**
 - Modify: `frontend/package.json` (scripts object)
+- Create: `frontend/test/package-scripts.test.mjs`
 
-- [ ] **Step 1: Add the test script without changing dependencies**
+- [ ] **Step 1: Write the failing package-script regression test**
+
+Create `frontend/test/package-scripts.test.mjs`:
+
+```javascript
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+
+const packageJson = JSON.parse(
+  await readFile(new URL('../package.json', import.meta.url), 'utf8'),
+)
+
+test('exposes the canonical frontend test command', () => {
+  assert.equal(packageJson.scripts.test, 'node --test test')
+})
+```
+
+- [ ] **Step 2: Run the test and confirm the expected failure**
+
+```powershell
+Push-Location frontend
+node --test test/package-scripts.test.mjs
+Pop-Location
+```
+
+Expected: FAIL because `scripts.test` is absent from `frontend/package.json`.
+
+- [ ] **Step 3: Add the test script without changing dependencies**
 
 Change the scripts object to include:
 
@@ -250,7 +281,7 @@ Change the scripts object to include:
 
 Keep `dev`, `build`, `lint`, `sync:calendar`, and `preview` unchanged.
 
-- [ ] **Step 2: Run frontend tests and build**
+- [ ] **Step 4: Run frontend tests and build**
 
 ```powershell
 Push-Location frontend
@@ -262,21 +293,99 @@ Pop-Location
 
 Expected: Node reports all discovered tests passing, oxlint exits 0, and Vite produces `frontend/dist/`.
 
-- [ ] **Step 3: Commit the package script**
+- [ ] **Step 5: Commit the package script and regression test**
 
 ```powershell
-git add frontend/package.json
+git add frontend/package.json frontend/test/package-scripts.test.mjs
 git commit -m "test: add canonical frontend test script"
 ```
 
 Expected: `frontend/package-lock.json` is unchanged because no dependency is added.
 
+### Task 3a: Enable the tracked Vue admin build dependency
+
+**Files:**
+- Modify: `admin-web/pnpm-workspace.yaml`
+
+- [ ] **Step 1: Record the current frozen-install failure**
+
+```powershell
+pnpm --dir admin-web install --frozen-lockfile
+```
+
+Expected: FAIL with `ERR_PNPM_IGNORED_BUILDS` for `esbuild`, because the tracked workspace configuration leaves its build permission unresolved.
+
+- [ ] **Step 2: Permit the required build script**
+
+Replace the workspace configuration with:
+
+```yaml
+allowBuilds:
+  esbuild: true
+```
+
+- [ ] **Step 3: Verify frozen install and production build**
+
+```powershell
+pnpm --dir admin-web install --frozen-lockfile
+pnpm --dir admin-web run build
+```
+
+Expected: frozen installation exits 0 and the Vue/Vite build produces `admin-web/dist/`.
+
+- [ ] **Step 4: Commit the tracked build permission**
+
+```powershell
+git add admin-web/pnpm-workspace.yaml
+git commit -m "build: allow admin web esbuild dependency"
+```
+
+Expected: only `admin-web/pnpm-workspace.yaml` is included.
+
 ### Task 4: Implement the shared local quality gate
 
 **Files:**
 - Create: `scripts/quality-gate.ps1`
+- Create: `scripts/test-quality-gate.Tests.ps1`
+- Modify: `docs/engineering/ai-code-standard.md` (Quality Gates section)
 
-- [ ] **Step 1: Implement stage execution and failure propagation**
+- [ ] **Step 1: Write the failing quality-gate contract test**
+
+Create `scripts/test-quality-gate.Tests.ps1`:
+
+```powershell
+Describe 'quality-gate contract' {
+    It 'defines the required gate stages in execution order' {
+        $script = Get-Content -Raw (Join-Path $PSScriptRoot 'quality-gate.ps1')
+        $expectedStages = @(
+            "Invoke-Native 'Whitespace check' 'git' @('diff', '--check')",
+            "Invoke-Native 'Frontend dependencies' 'npm' @('ci', '--ignore-scripts')",
+            "Invoke-Native 'Frontend lint' 'npm' @('run', 'lint')",
+            "Invoke-Native 'Frontend tests' 'npm' @('run', 'test')",
+            "Invoke-Native 'Frontend build' 'npm' @('run', 'build')",
+            "Invoke-Native 'Admin web dependencies' 'pnpm' @('install', '--frozen-lockfile')",
+            "Invoke-Native 'Admin web build' 'pnpm' @('run', 'build')",
+            "Invoke-Native 'Backend Maven tests' '.\\mvnw.cmd' @('-q', 'test')"
+        )
+
+        $positions = $expectedStages | ForEach-Object { $script.IndexOf($_) }
+        $positions | ForEach-Object { $_ | Should BeGreaterThan -1 }
+        for ($index = 1; $index -lt $positions.Count; $index++) {
+            $positions[$index] | Should BeGreaterThan $positions[$index - 1]
+        }
+    }
+}
+```
+
+- [ ] **Step 2: Run the contract test and confirm the expected failure**
+
+```powershell
+Invoke-Pester scripts/test-quality-gate.Tests.ps1
+```
+
+Expected: FAIL because `scripts/quality-gate.ps1` does not yet exist.
+
+- [ ] **Step 3: Implement stage execution and failure propagation**
 
 Create the script with this behavior:
 
@@ -313,6 +422,10 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Node.js is required; install a supported Node.js release.' }
     Write-Host "Node.js: $nodeVersion"
 
+    $pnpmVersion = (& pnpm --version 2>&1 | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'pnpm is required for admin-web; install the pinned package manager with Corepack.' }
+    Write-Host "pnpm: $pnpmVersion"
+
     $javaVersion = (& java -version 2>&1 | Out-String).Trim()
     if ($LASTEXITCODE -ne 0 -or $javaVersion -notmatch 'version "21') {
         throw "Java 21 is required. Detected: $javaVersion"
@@ -323,6 +436,8 @@ try {
     Invoke-Native 'Frontend lint' 'npm' @('run', 'lint') (Join-Path $repoRoot 'frontend')
     Invoke-Native 'Frontend tests' 'npm' @('run', 'test') (Join-Path $repoRoot 'frontend')
     Invoke-Native 'Frontend build' 'npm' @('run', 'build') (Join-Path $repoRoot 'frontend')
+    Invoke-Native 'Admin web dependencies' 'pnpm' @('install', '--frozen-lockfile') (Join-Path $repoRoot 'admin-web')
+    Invoke-Native 'Admin web build' 'pnpm' @('run', 'build') (Join-Path $repoRoot 'admin-web')
     Invoke-Native 'Backend Maven tests' '.\mvnw.cmd' @('-q', 'test') (Join-Path $repoRoot 'backend')
     Write-Host "`nQUALITY GATE PASSED" -ForegroundColor Green
 }
@@ -335,30 +450,84 @@ finally {
 }
 ```
 
-- [ ] **Step 2: Verify the script from the repository root**
+- [ ] **Step 4: Run the quality-gate contract test**
+
+```powershell
+Invoke-Pester scripts/test-quality-gate.Tests.ps1
+```
+
+Expected: PASS, proving all eight native command stages are present in the required order.
+
+- [ ] **Step 5: Make the published standard describe the final shared gate**
+
+In `docs/engineering/ai-code-standard.md`, replace the transitional `admin-web` gate wording with a statement that `scripts/quality-gate.ps1` runs all eight required stages: `git diff --check`; React dependency install, lint, Node tests, and build; Vue admin dependency install and build; and Java 21 Maven tests. State that `admin-web` currently has no lint or test command, and that adding either requires adding it to the shared gate and CI before deployment.
+
+- [ ] **Step 6: Verify the script from the repository root**
 
 ```powershell
 pwsh -File scripts/quality-gate.ps1
 ```
 
-Expected: stages appear in the documented order and the final line is `QUALITY GATE PASSED`; any failure exits 1 and names the failed stage.
+Expected: whitespace, React frontend, Vue admin frontend, and backend stages appear in the documented order and the final line is `QUALITY GATE PASSED`; any failure exits 1 and names the failed stage.
 
-- [ ] **Step 3: Commit the local gate**
+- [ ] **Step 7: Commit the local gate, contract test, and standard correction**
 
 ```powershell
-git add scripts/quality-gate.ps1
+git add scripts/quality-gate.ps1 scripts/test-quality-gate.Tests.ps1 docs/engineering/ai-code-standard.md
 git commit -m "ci: add shared local quality gate"
 ```
 
-Expected: only `scripts/quality-gate.ps1` is included.
+Expected: only `scripts/quality-gate.ps1`, its Pester contract test, and the Quality Gates wording correction are included.
 
 ### Task 5: Enforce high-risk pull-request evidence
 
 **Files:**
 - Create: `scripts/check-risk-evidence.ps1`
+- Create: `scripts/test-check-risk-evidence.Tests.ps1`
 - Create: `.github/pull_request_template.md`
 
-- [ ] **Step 1: Implement changed-file classification**
+- [ ] **Step 1: Write the failing high-risk evidence test**
+
+Create `scripts/test-check-risk-evidence.Tests.ps1` with a Pester test that creates a temporary Git repository, copies `scripts/check-risk-evidence.ps1` into its `scripts/` directory, commits an empty baseline, writes `backend/src/main/java/com/example/service/PaymentService.java`, and supplies a pull-request event JSON body that omits the required evidence headings. Assert that the checker exits 1 and reports `Threat` as a missing heading:
+
+```powershell
+Describe 'check-risk-evidence' {
+    It 'rejects an incomplete pull request body for a high-risk payment service change' {
+        $temporaryRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("risk-evidence-test-" + [guid]::NewGuid())
+        New-Item -ItemType Directory -Path (Join-Path $temporaryRepo 'scripts') -Force | Out-Null
+        try {
+            Copy-Item (Join-Path $PSScriptRoot 'check-risk-evidence.ps1') (Join-Path $temporaryRepo 'scripts/check-risk-evidence.ps1')
+            Push-Location $temporaryRepo
+            git init -q
+            git config user.email 'test@example.invalid'
+            git config user.name 'Quality Gate Test'
+            New-Item -ItemType File -Path '.gitkeep' | Out-Null
+            git add .gitkeep
+            git commit -qm 'baseline'
+            New-Item -ItemType Directory -Path 'backend/src/main/java/com/example/service' -Force | Out-Null
+            Set-Content -Path 'backend/src/main/java/com/example/service/PaymentService.java' -Value 'class PaymentService {}'
+            Set-Content -Path 'event.json' -Value '{"pull_request":{"body":"## Summary\nHigh-risk change"}}'
+            $result = & ./scripts/check-risk-evidence.ps1 -BaseRef HEAD -EventPath (Join-Path $temporaryRepo 'event.json') 2>&1
+            $LASTEXITCODE | Should Be 1
+            ($result | Out-String) | Should Match 'Threat'
+        }
+        finally {
+            Pop-Location -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $temporaryRepo -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+```
+
+- [ ] **Step 2: Run the test and confirm the expected failure**
+
+```powershell
+Invoke-Pester scripts/test-check-risk-evidence.Tests.ps1
+```
+
+Expected: FAIL because `scripts/check-risk-evidence.ps1` does not yet exist.
+
+- [ ] **Step 3: Implement changed-file classification**
 
 Create `scripts/check-risk-evidence.ps1` with parameters `-BaseRef` and optional `-EventPath`. Normalize changed paths to `/`. When `-BaseRef` is `HEAD`, collect `git diff --name-only HEAD`, `git diff --cached --name-only`, and untracked paths from `git ls-files --others --exclude-standard`; otherwise collect `git diff --name-only "$BaseRef...HEAD"`. Use these regexes:
 
@@ -367,21 +536,31 @@ $highRiskPatterns = @(
     '^backend/.*/security/',
     '^backend/.*/config/',
     '^backend/.*/controller/',
-    '^backend/.*/service/',
+    '(?i)^backend/.*/service/.*(auth|security|permission|role|payment|upload).*\.java$',
     '^backend/src/main/resources/db/',
     '^frontend/src/api/',
     '^frontend/src/context/AuthContext',
     '^frontend/src/.*(route|Route|router|Router|guard|Guard)',
+    '^admin-web/src/api/',
+    '^admin-web/src/.*(route|Route|router|Router|guard|Guard)',
     '^\.github/',
     '(^|/)(Dockerfile|docker-compose[^/]*|nginx[^/]*|.*\.env[^/]*)$'
 )
 ```
 
-If no changed path matches, print `No high-risk files changed.` and exit 0. If high-risk files match and no `-EventPath` is supplied, print the files and the exact required evidence headings, then exit 0 so local inspection remains usable. If `-EventPath` is supplied, parse `pull_request.body` and require non-empty sections containing `Threat`, `compatibility` or `migration`, `Rollback`, `Regression`, and `Human review`; otherwise throw a descriptive error and exit 1.
+If no changed path matches, print `No high-risk files changed.` and exit 0. If high-risk files match and no `-EventPath` is supplied, print the files and the exact required evidence headings, then exit 0 so local inspection remains usable. If `-EventPath` is supplied, parse `pull_request.body` and require non-empty sections containing `Threat`, `compatibility` or `migration`, `Rollback`, `Regression`, `Human review`, `Reviewer identity`, `Review timestamp`, and `Pull-request link or branch-protection approval result`; otherwise throw a descriptive error and exit 1.
 
-- [ ] **Step 2: Add the PR evidence template**
+- [ ] **Step 4: Run the Pester test and add the PR evidence template**
 
-Create `.github/pull_request_template.md`:
+Run:
+
+```powershell
+Invoke-Pester scripts/test-check-risk-evidence.Tests.ps1
+```
+
+Expected: PASS. The test proves a payment-service change without required PR evidence is rejected.
+
+Then create `.github/pull_request_template.md`:
 
 ```markdown
 ## Summary
@@ -407,9 +586,12 @@ Create `.github/pull_request_template.md`:
 - Rollback procedure:
 - Regression test name and result:
 - Human reviewer and approval:
+- Reviewer identity:
+- Review timestamp:
+- Pull-request link or branch-protection approval result:
 ```
 
-- [ ] **Step 3: Verify the checker against the current diff**
+- [ ] **Step 5: Verify the checker against the current diff**
 
 ```powershell
 pwsh -File scripts/check-risk-evidence.ps1 -BaseRef HEAD
@@ -417,14 +599,14 @@ pwsh -File scripts/check-risk-evidence.ps1 -BaseRef HEAD
 
 Expected: it lists the current high-risk files and required evidence without failing because no GitHub event body was supplied.
 
-- [ ] **Step 4: Commit risk evidence controls**
+- [ ] **Step 6: Commit risk evidence controls**
 
 ```powershell
-git add scripts/check-risk-evidence.ps1 .github/pull_request_template.md
+git add scripts/check-risk-evidence.ps1 scripts/test-check-risk-evidence.Tests.ps1 .github/pull_request_template.md
 git commit -m "ci: require evidence for high-risk changes"
 ```
 
-Expected: only the checker and PR template are included.
+Expected: only the checker, its Pester test, and the PR template are included.
 
 ### Task 6: Add GitHub Actions using the shared gate
 
@@ -440,7 +622,6 @@ name: quality-gate
 
 on:
   push:
-    branches: [main, master]
   pull_request:
 
 permissions:
@@ -461,6 +642,23 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+
+      - name: Resolve pnpm store path
+        id: pnpm-store
+        shell: pwsh
+        run: '"STORE_PATH=$(pnpm store path)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append'
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('admin-web/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
 
       - name: Set up Java 21
         uses: actions/setup-java@v4
@@ -486,11 +684,11 @@ jobs:
 Run:
 
 ```powershell
-rg -n "quality-gate.ps1|check-risk-evidence.ps1|node-version|java-version|pull_request|push" .github/workflows/quality-gate.yml
+rg -n "quality-gate.ps1|check-risk-evidence.ps1|node-version|java-version|pnpm/action-setup|actions/cache|pull_request|push" .github/workflows/quality-gate.yml
 git diff --check
 ```
 
-Expected: both scripts, Node 22, Java 21, push, and pull-request triggers are present; `git diff --check` exits 0.
+Expected: both scripts, Node 22, pnpm 11.3.0, Java 21, push, and pull-request triggers are present; `git diff --check` exits 0.
 
 - [ ] **Step 3: Commit the workflow**
 
@@ -504,7 +702,7 @@ Expected: only the workflow file is included.
 ### Task 7: Full governance verification and audit handoff
 
 **Files:**
-- Verify: `AGENTS.md`, `CLAUDE.md`, `docs/engineering/ai-code-standard.md`, `docs/engineering/ai-delivery-record-template.md`, `scripts/quality-gate.ps1`, `scripts/check-risk-evidence.ps1`, `.github/pull_request_template.md`, `.github/workflows/quality-gate.yml`, `frontend/package.json`
+- Verify: `AGENTS.md`, `CLAUDE.md`, `docs/engineering/ai-code-standard.md`, `docs/engineering/ai-delivery-record-template.md`, `scripts/quality-gate.ps1`, `scripts/check-risk-evidence.ps1`, `.github/pull_request_template.md`, `.github/workflows/quality-gate.yml`, `frontend/package.json`, `frontend/test/package-scripts.test.mjs`, `admin-web/pnpm-workspace.yaml`
 
 - [ ] **Step 1: Run the complete local gate**
 
@@ -512,12 +710,12 @@ Expected: only the workflow file is included.
 pwsh -File scripts/quality-gate.ps1
 ```
 
-Expected: all six stages pass and the process exits 0.
+Expected: all eight stages pass and the process exits 0.
 
 - [ ] **Step 2: Run audit and placeholder scans**
 
 ```powershell
-rg -n "deferred|placeholder|fill in details" AGENTS.md CLAUDE.md docs/engineering scripts .github frontend/package.json
+rg -n "deferred|placeholder|fill in details" AGENTS.md CLAUDE.md docs/engineering scripts .github frontend/package.json frontend/test admin-web/pnpm-workspace.yaml
 rg -n "claude-code-everything.*(installed|enabled|invoked)|superpowers|quality-gate|high-risk|human review" AGENTS.md CLAUDE.md docs/engineering .github scripts
 git diff --check
 git status --short
@@ -529,7 +727,7 @@ Expected: the first scan has no output; the second scan shows the required gover
 
 ```powershell
 git log --oneline --decorate -8
-git diff --stat HEAD~7..HEAD
+git diff --stat 718fa48..HEAD
 ```
 
 Expected: governance commits contain only the files listed in this plan, with no business-code or generated-file changes.
@@ -540,6 +738,6 @@ Copy `docs/engineering/ai-delivery-record-template.md` to a review location or P
 
 ## Plan Self-Review
 
-- **Spec coverage:** Tasks 1-2 cover repository contracts, standards, delivery records, plugin truthfulness, and high-risk policy. Tasks 3-4 cover frontend testing and the six-stage local gate. Tasks 5-6 cover high-risk evidence, PR review, and push/PR CI. Task 7 covers acceptance criteria, auditability, and final verification.
+- **Spec coverage:** Tasks 1-2 cover repository contracts, standards, delivery records, plugin truthfulness, high-risk policy, review metadata, and emergency handling. Task 3 covers the React test command; Task 3a enables the tracked Vue admin production build. Task 4 covers the eight-stage shared local gate. Tasks 5-6 cover high-risk evidence, PR review, and push/PR CI for all repository applications. Task 7 covers acceptance criteria, auditability, and final verification.
 - **Placeholder scan:** A scan for deferred or placeholder language returns no output; all commands, paths, headings, patterns, and expected outcomes are specified.
-- **Type/path consistency:** `frontend/package.json` exposes `npm run test`; `scripts/quality-gate.ps1` invokes it from `frontend`; the workflow invokes the same root script. The risk checker parameters match the workflow invocation. Every created path appears in the file map and in exactly one owning task.
+- **Type/path consistency:** `frontend/package.json` exposes `npm run test`; `scripts/quality-gate.ps1` invokes it from `frontend`; the script also invokes `pnpm install --frozen-lockfile` and `pnpm run build` from `admin-web`; the workflow invokes the same root script. The risk checker parameters match the workflow invocation. Every created path appears in the file map and in exactly one owning task.
