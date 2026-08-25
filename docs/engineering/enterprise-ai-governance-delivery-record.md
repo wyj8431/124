@@ -28,7 +28,7 @@
 
 - Commit range: `718fa48..34c8087`.
 - Runtime versions: Node.js `v22.22.2`; npm `10.9.7`; pnpm `11.3.0`; Java `21.0.12`; Pester `3.4.0`.
-- CI run or pull-request link: No remote CI run or pull request has been created from this local branch.
+- CI run or pull-request link: Remote branch `codex/enterprise-ai-governance` was pushed at `b3d242b`. GitHub Actions [`quality-gate` run #32837686817](https://github.com/wyj8431/124/actions/runs/32837686817) and its `quality` job completed successfully. No pull request was created because this environment has no GitHub CLI, GitHub MCP write tool, or GitHub API token.
 - Stage-level results: all quality-gate stages passed. React lint exited 0 with 9 existing warnings. React and Vue Vite builds emitted non-failing large-chunk warnings; React also emitted a non-failing future native-config-loader warning. Maven emitted non-failing JDK dynamic-agent warnings.
 
 ## Affected Cross-Layer Flow Evidence
@@ -41,8 +41,8 @@
 
 ## Residual Risk and Unverified Work
 
-- External integrations not verified: GitHub Actions has not run remotely; remote default-branch protection, required reviewer policy, stale-approval dismissal, and bypass restrictions have not been inspected or configured in this local workspace.
-- Follow-up risk: Remote CI and repository branch protection still need inspection and enforcement. The collaboration revision path uses a response-body 409 with HTTP 200 to preserve the existing `Result` contract; external clients must continue checking the body code. `claude-code-everything` remains unavailable and must not be represented as installed.
+- External integrations not verified: Remote default-branch protection, required reviewer policy, stale-approval dismissal, and bypass restrictions have not been inspected or configured in this local workspace.
+- Follow-up risk: A human with GitHub write access must create a pull request from the pushed branch and verify branch-protection enforcement before merge. The collaboration revision path uses a response-body 409 with HTTP 200 to preserve the existing `Result` contract; external clients must continue checking the body code. `claude-code-everything` remains unavailable and must not be represented as installed.
 
 ## High-Risk Evidence
 
@@ -53,4 +53,4 @@
 - Human reviewer and approval: Pending. This high-risk branch must not merge until a qualified human approves it.
 - Reviewer identity: Not yet assigned.
 - Review timestamp: Not yet available.
-- Pull-request link or branch-protection approval result: No pull request has been created. Record the pull-request URL and the verified default-branch protection result before merge.
+- Pull-request link or branch-protection approval result: No pull request has been created. Open [the compare page](https://github.com/wyj8431/124/pull/new/codex/enterprise-ai-governance), then record the resulting PR URL and verified default-branch protection result before merge.
