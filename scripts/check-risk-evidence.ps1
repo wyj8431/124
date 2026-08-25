@@ -37,11 +37,16 @@ function Get-ChangedPaths {
     param([string]$Reference)
 
     if ($Reference -eq 'HEAD') {
-        $paths = @(
-            & git diff --name-only HEAD
-            & git diff --cached --name-only
-            & git ls-files --others --exclude-standard
-        )
+        $workingTreePaths = @(& git diff --name-only HEAD)
+        if ($LASTEXITCODE -ne 0) { throw "Unable to inspect working-tree changes from '$Reference'." }
+
+        $cachedPaths = @(& git diff --cached --name-only)
+        if ($LASTEXITCODE -ne 0) { throw "Unable to inspect staged changes from '$Reference'." }
+
+        $untrackedPaths = @(& git ls-files --others --exclude-standard)
+        if ($LASTEXITCODE -ne 0) { throw "Unable to inspect untracked changes from '$Reference'." }
+
+        $paths = @($workingTreePaths + $cachedPaths + $untrackedPaths)
     }
     else {
         $paths = @(& git diff --name-only "$Reference...HEAD")
@@ -62,7 +67,8 @@ function Get-ChangedPaths {
 function Test-MeaningfulContent {
     param([string]$Content)
 
-    $withoutEmptyListItems = $Content -replace '(?m)^\s*[-*+]\s*(\[[ xX]\]\s*)?$', ''
+    $visibleContent = $Content -replace '(?s)<!--.*?-->', ''
+    $withoutEmptyListItems = $visibleContent -replace '(?m)^\s*[-*+]\s*(\[[ xX]\]\s*)?$', ''
     return -not [string]::IsNullOrWhiteSpace($withoutEmptyListItems)
 }
 
@@ -138,7 +144,7 @@ try {
         throw "Missing required high-risk evidence headings or content: $($missingEvidence -join ', ')."
     }
 
-    Write-Host 'High-risk pull-request evidence is complete.'
+    Write-Output 'High-risk pull-request evidence is complete.'
 }
 catch {
     Write-Output $_.Exception.Message

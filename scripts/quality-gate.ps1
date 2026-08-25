@@ -22,23 +22,41 @@ function Invoke-Native {
     }
 }
 
+function Invoke-RuntimeCheck {
+    param(
+        [string]$Name,
+        [string]$File,
+        [string[]]$Arguments,
+        [string]$ExpectedVersionPattern
+    )
+
+    Invoke-GateStage -Name $Name -Command {
+        $command = Get-Command -Name $File -CommandType Application -ErrorAction SilentlyContinue
+        if (-not $command) {
+            throw "$Name requires '$File' to be available on PATH."
+        }
+
+        $versionOutput = & $command.Source @Arguments 2>&1
+        $exitCode = $LASTEXITCODE
+        $versionOutput | ForEach-Object { Write-Host $_ }
+        if ($exitCode -ne 0) {
+            throw "$Name version check failed with exit code $exitCode."
+        }
+
+        $version = ($versionOutput | Out-String).Trim()
+        if ($ExpectedVersionPattern -and $version -notmatch $ExpectedVersionPattern) {
+            throw "$Name requires $ExpectedVersionPattern. Detected: $version"
+        }
+    }
+}
+
 Push-Location $repoRoot
 try {
     Invoke-Native 'Whitespace check' 'git' @('diff', '--check') $repoRoot
 
-    $nodeVersion = (& node --version 2>&1 | Out-String).Trim()
-    if ($LASTEXITCODE -ne 0) { throw 'Node.js is required; install a supported Node.js release.' }
-    Write-Host "Node.js: $nodeVersion"
-
-    $pnpmVersion = (& pnpm --version 2>&1 | Out-String).Trim()
-    if ($LASTEXITCODE -ne 0) { throw 'pnpm is required for admin-web; install the pinned package manager with Corepack.' }
-    Write-Host "pnpm: $pnpmVersion"
-
-    $javaVersion = (& java -version 2>&1 | Out-String).Trim()
-    if ($LASTEXITCODE -ne 0 -or $javaVersion -notmatch 'version "21') {
-        throw "Java 21 is required. Detected: $javaVersion"
-    }
-    Write-Host "Java: $javaVersion"
+    Invoke-RuntimeCheck 'Node.js runtime' 'node' @('--version')
+    Invoke-RuntimeCheck 'pnpm runtime' 'pnpm' @('--version')
+    Invoke-RuntimeCheck 'Java runtime' 'java' @('-version') 'version "21'
 
     Invoke-Native 'Frontend dependencies' 'npm' @('ci', '--ignore-scripts') (Join-Path $repoRoot 'frontend')
     Invoke-Native 'Frontend lint' 'npm' @('run', 'lint') (Join-Path $repoRoot 'frontend')
