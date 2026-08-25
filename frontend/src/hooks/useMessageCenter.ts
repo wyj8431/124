@@ -7,6 +7,7 @@ export function useMessageCenterIndex(enabled = true) {
     queryFn: messageCenterApi.getIndex,
     enabled,
     staleTime: 30_000,
+    refetchInterval: enabled ? 30_000 : false,
   })
 }
 

@@ -28,7 +28,8 @@ public class MessageCenterService {
     private static final Map<String, String> CATEGORY_LABELS = Map.of(
         "system", "系统通知",
         "activity", "活动消息",
-        "order", "订单消息"
+        "order", "订单消息",
+        "collaboration", "协作通知"
     );
 
     private final UserMessageMapper messageMapper;
@@ -95,7 +96,8 @@ public class MessageCenterService {
             tab("all", "全部", countUnread(userId, null)),
             tab("system", "系统通知", countUnread(userId, "system")),
             tab("activity", "活动消息", countUnread(userId, "activity")),
-            tab("order", "订单消息", countUnread(userId, "order"))
+            tab("order", "订单消息", countUnread(userId, "order")),
+            tab("collaboration", "协作通知", countUnread(userId, "collaboration"))
         );
     }
 

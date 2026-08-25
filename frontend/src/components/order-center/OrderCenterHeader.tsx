@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Bell, Camera, ChevronDown, MoreHorizontal } from 'lucide-react'
+import { Camera, ChevronDown, MoreHorizontal } from 'lucide-react'
+import { NotificationBell } from '@/components/common/NotificationBell'
 import { PlatformBrand } from '@/components/common/PlatformBrand'
 import { UserAccountMenu } from '@/components/layout/UserAccountMenu'
 import { VipMembershipMenu } from '@/components/layout/VipMembershipMenu'
@@ -45,9 +46,8 @@ export function OrderCenterHeader() {
           <Link to="/designtools/enterprise/accountOverview" className="order-center-header__enterprise">
             企业服务
           </Link>
-          <Link to="/message-center" className="order-center-header__bell" aria-label="消息">
-            <Bell className="h-5 w-5" />
-          </Link>          <UserAccountMenu variant="avatar" />
+          <NotificationBell className="order-center-header__bell" />
+          <UserAccountMenu variant="avatar" />
         </div>
       </div>
     </header>
