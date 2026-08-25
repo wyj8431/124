@@ -54,4 +54,41 @@ exit /b 0
             Remove-Item -LiteralPath $temporaryRepo -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
+
+    It 'uses the first runtime executable when PATH contains multiple candidates' {
+        $temporaryRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("quality-gate-test-" + [guid]::NewGuid())
+        $mockBinA = Join-Path $temporaryRepo 'mock-bin-a'
+        $mockBinB = Join-Path $temporaryRepo 'mock-bin-b'
+        $originalPath = $env:PATH
+        $pwshPath = (Get-Command pwsh).Source
+        try {
+            New-Item -ItemType Directory -Path (Join-Path $temporaryRepo 'scripts'), $mockBinA, $mockBinB -Force | Out-Null
+            Copy-Item (Join-Path $PSScriptRoot 'quality-gate.ps1') (Join-Path $temporaryRepo 'scripts/quality-gate.ps1')
+            @'
+@echo off
+exit /b 0
+'@ | Set-Content -Path (Join-Path $mockBinA 'git.cmd')
+            @'
+@echo off
+echo mock-node-a
+exit /b 0
+'@ | Set-Content -Path (Join-Path $mockBinA 'node.cmd')
+            @'
+@echo off
+echo mock-node-b
+exit /b 0
+'@ | Set-Content -Path (Join-Path $mockBinB 'node.cmd')
+
+            $env:PATH = "$mockBinA;$mockBinB;$env:SystemRoot\System32"
+            $result = & $pwshPath -NoProfile -File (Join-Path $temporaryRepo 'scripts/quality-gate.ps1') 2>&1
+
+            $LASTEXITCODE | Should Be 1
+            ($result | Out-String) | Should Match 'mock-node-a'
+            ($result | Out-String) | Should Match 'pnpm runtime'
+        }
+        finally {
+            $env:PATH = $originalPath
+            Remove-Item -LiteralPath $temporaryRepo -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
 }

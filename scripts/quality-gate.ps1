@@ -31,7 +31,7 @@ function Invoke-RuntimeCheck {
     )
 
     Invoke-GateStage -Name $Name -Command {
-        $command = Get-Command -Name $File -CommandType Application -ErrorAction SilentlyContinue
+        $command = Get-Command -Name $File -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
         if (-not $command) {
             throw "$Name requires '$File' to be available on PATH."
         }
