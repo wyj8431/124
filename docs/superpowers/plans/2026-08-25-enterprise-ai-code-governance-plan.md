@@ -257,7 +257,7 @@ const packageJson = JSON.parse(
 )
 
 test('exposes the canonical frontend test command', () => {
-  assert.equal(packageJson.scripts.test, 'node --test test')
+  assert.equal(packageJson.scripts.test, 'node --test test/*.test.mjs')
 })
 ```
 
@@ -276,7 +276,7 @@ Expected: FAIL because `scripts.test` is absent from `frontend/package.json`.
 Change the scripts object to include:
 
 ```json
-"test": "node --test test"
+"test": "node --test test/*.test.mjs"
 ```
 
 Keep `dev`, `build`, `lint`, `sync:calendar`, and `preview` unchanged.
