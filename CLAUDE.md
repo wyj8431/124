@@ -13,6 +13,8 @@ Use sub-agents proactively only when the task has independent, bounded parts tha
 ## Before Work
 
 - Follow this required sequence for planned changes: `superpowers:brainstorming` -> user confirmation -> `superpowers:writing-plans` -> `superpowers:test-driven-development` -> implementation -> `superpowers:verification-before-completion`.
+- Every multi-step task, including features, refactors, documentation, and infrastructure work, must leave a design document under `docs/superpowers/specs/` and an implementation plan under `docs/superpowers/plans/` before implementation.
+- Use `superpowers:test-driven-development` before implementation for behavior changes and test changes; keep the smallest useful failing test, implementation, and regression coverage.
 - Read the repository guidance and relevant installed skills before changing code. Treat the approved plan and the user's latest request as the source of truth.
 
 ## Implementation Contract
