@@ -21,6 +21,12 @@ test('team comments and versions create notifications for other members', () => 
   assert.match(collaborationServiceSource, /新版本快照已创建/)
 })
 
+test('comment replies notify the original commenter', () => {
+  assert.match(collaborationServiceSource, /findParentComment/)
+  assert.match(collaborationServiceSource, /评论被回复/)
+  assert.match(collaborationServiceSource, /你的评论收到了一条新回复/)
+})
+
 test('top-level notification bell exposes unread count and refreshes it', () => {
   assert.match(notificationBellSource, /useMessageCenterIndex\(isLoggedIn\)/)
   assert.match(notificationBellSource, /notification-bell__badge/)
