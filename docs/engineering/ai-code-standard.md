@@ -54,7 +54,7 @@ Treat changes to `backend/**/security/**`, `backend/**/config/**`, `backend/**/c
 
 ## Quality Gates
 
-The only local entry point is `scripts/quality-gate.ps1`. It runs `git diff --check`, frontend dependency installation, frontend lint, frontend tests, frontend build, and backend Maven tests in that order. For any `admin-web` change, the `admin-web` owner must also run `pnpm --dir admin-web install --frozen-lockfile` and `pnpm --dir admin-web build`; until those stages are wired into the shared script, the delivery record must include their real results separately. Before deployment, the CI owner must ensure those `admin-web` stages are enforced in CI. When `admin-web` lint or test scripts are introduced, the owner must add them to the gate and retain their output. Any failure returns a non-zero exit code and retains the original command output. The script never auto-fixes code, deletes user files, or modifies database source files.
+The only local entry point is `scripts/quality-gate.ps1`. It runs eight required stages in order: `git diff --check`; React frontend dependency installation, lint, Node tests, and build; Vue `admin-web` dependency installation and build; and Java 21 Maven tests. `admin-web` currently has no lint or test command. Adding either requires adding it to the shared gate and CI before deployment. Any failure returns a non-zero exit code and retains the original command output. The script never auto-fixes code, deletes user files, or modifies database source files.
 
 GitHub Actions invokes the same script on pushes and pull requests. Pull requests that touch high-risk paths must also satisfy the evidence check and receive human approval.
 
