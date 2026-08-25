@@ -20,13 +20,13 @@
 
 | Command | Result | Notes |
 | --- | --- | --- |
-| `pwsh -NoProfile -Command "Invoke-Pester scripts/test-quality-gate.Tests.ps1"` | PASS | 3 passed, 0 failed. Covers eight stages, named runtime preflights, and missing-Node reporting. |
+| `pwsh -NoProfile -Command "Invoke-Pester scripts/test-quality-gate.Tests.ps1"` | PASS | 4 passed, 0 failed. Covers eight stages, named runtime preflights, missing-Node reporting, and multiple PATH candidates. |
 | `pwsh -NoProfile -Command "Invoke-Pester scripts/test-check-risk-evidence.Tests.ps1"` | PASS | 4 passed, 0 failed. Covers incomplete and complete PR bodies, comment-only evidence rejection, and Git enumeration failure. |
 | `pnpm --dir admin-web install --frozen-lockfile` | PASS | pnpm 11.3.0; the tracked `esbuild` permission enables installation. |
 | `pnpm --dir admin-web run build` | PASS | Vite built successfully; it emitted a non-failing large-chunk warning. |
 | `pwsh -NoProfile -File scripts/quality-gate.ps1` | FAIL | Stopped at React frontend tests: 5 passed, 1 failed because `frontend/src/types/team.ts` is absent from this isolated branch baseline. Remaining gate stages did not run by design. |
 
-- Commit range: `718fa48..6d7adda`.
+- Commit range: `718fa48..b50edb1`.
 - Runtime versions: Node.js `v22.22.2`; npm `10.9.7`; pnpm `11.3.0`; Java `21.0.12`; Pester `3.4.0`.
 - CI run or pull-request link: No remote CI run or pull request has been created from this local branch.
 - Stage-level results: `git diff --check`, frontend `npm ci --ignore-scripts`, and frontend lint passed during the complete gate. Lint exited 0 with 9 existing warnings. Frontend tests failed for the isolated-branch baseline issue above; frontend build, admin-web, and Maven stages were therefore skipped in that run.
@@ -48,8 +48,8 @@
 
 - Threat surface and authorization impact: CI and repository instructions govern what can merge; a weak gate or fabricated PR evidence could allow unreviewed high-risk changes. The checker requires evidence content, rejects comment-only entries, and the standard requires remote branch protection.
 - Data migration and compatibility window: No database schema or public API migration is included. The existing frontend/backend contracts are unchanged.
-- Rollback procedure: Revert the governance commits from `cf0f61b` through `6d7adda` in reverse order after restoring the prior repository instructions and CI policy; do not delete delivery evidence.
-- Regression test name and result: `quality-gate contract` passed 3/3; `check-risk-evidence` passed 4/4.
+- Rollback procedure: Revert the governance commits from `cf0f61b` through `b50edb1` in reverse order after restoring the prior repository instructions and CI policy; do not delete delivery evidence.
+- Regression test name and result: `quality-gate contract` passed 4/4; `check-risk-evidence` passed 4/4.
 - Human reviewer and approval: Pending. This high-risk branch must not merge until a qualified human approves it.
 - Reviewer identity: Not yet assigned.
 - Review timestamp: Not yet available.
