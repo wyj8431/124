@@ -1,4 +1,6 @@
-# Agent Working Rules
+# Claude Code Repository Contract
+
+This file is the Claude Code-compatible entry point for the repository. It mirrors `AGENTS.md`; both files are normative and must stay consistent.
 
 ## Skills, MCP, and Agents
 
@@ -10,25 +12,20 @@ Use sub-agents proactively only when the task has independent, bounded parts tha
 
 ## Before Work
 
-- Read the repository guidance and the relevant installed skills before changing code.
-- For any new feature, behavior change, or bug fix, use the `superpowers` workflow: `superpowers:brainstorming`, obtain user confirmation, then `superpowers:writing-plans`.
-- Treat the approved plan and the user's latest request as the source of truth. Do not infer unrelated scope.
+- Follow this required sequence for planned changes: `superpowers:brainstorming` -> user confirmation -> `superpowers:writing-plans` -> `superpowers:test-driven-development` -> implementation -> `superpowers:verification-before-completion`.
+- Read the repository guidance and relevant installed skills before changing code. Treat the approved plan and the user's latest request as the source of truth.
 
 ## Implementation Contract
 
-- Use `superpowers:test-driven-development` before implementation whenever behavior or tests change; keep the smallest useful failing test, implementation, and regression coverage.
 - Make minimal, reversible changes. Preserve existing user changes, repository conventions, public contracts, and data. Never reset or overwrite unrelated work.
 - Keep secrets, credentials, generated artifacts, and machine-local files out of commits. Use existing APIs, helpers, and dependency versions before introducing new abstractions.
-- For high-risk changes (authentication, authorization, payments, data migrations, destructive operations, security boundaries, or shared infrastructure), provide regression tests, a concise risk note, and explicit human review evidence in the delivery record.
+- High-risk changes (authentication, authorization, payments, data migrations, destructive operations, security boundaries, or shared infrastructure) require regression tests, a concise risk note, and explicit human review evidence in the delivery record.
 
 ## Verification Contract
 
-- Before completion, use `superpowers:verification-before-completion` and run the repository quality gate:
-
-  `pwsh -File scripts/quality-gate.ps1`
-
-- Report the exact commands and results, including any skipped check and why. Do not claim completion from inspection alone.
-- Every delivery must include or update the engineering standard at `docs/engineering/ai-code-standard.md` when the standard is affected, plus a delivery record describing scope, risks, tests, and review evidence.
+- Before completion, run `pwsh -File scripts/quality-gate.ps1` and report exact commands, results, and any justified skips.
+- Every delivery must include or update `docs/engineering/ai-code-standard.md` when the standard is affected, plus a delivery record covering scope, risks, tests, and review evidence.
+- `superpowers` is available in this environment. `claude-code-everything` was not found, so this repository does not claim that plugin is installed or invoked; compliance is enforced through these auditable rules and quality-gate results.
 
 ## Collaboration
 
