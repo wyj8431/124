@@ -27,7 +27,8 @@ function Invoke-RuntimeCheck {
         [string]$Name,
         [string]$File,
         [string[]]$Arguments,
-        [string]$ExpectedVersionPattern
+        [string]$ExpectedVersionPattern,
+        [switch]$SetJavaHome
     )
 
     Invoke-GateStage -Name $Name -Command {
@@ -47,6 +48,11 @@ function Invoke-RuntimeCheck {
         if ($ExpectedVersionPattern -and $version -notmatch $ExpectedVersionPattern) {
             throw "$Name requires $ExpectedVersionPattern. Detected: $version"
         }
+
+        if ($SetJavaHome -and [string]::IsNullOrWhiteSpace($env:JAVA_HOME)) {
+            $env:JAVA_HOME = Split-Path -Parent (Split-Path -Parent $command.Source)
+            Write-Host "JAVA_HOME: $env:JAVA_HOME"
+        }
     }
 }
 
@@ -56,7 +62,7 @@ try {
 
     Invoke-RuntimeCheck 'Node.js runtime' 'node' @('--version')
     Invoke-RuntimeCheck 'pnpm runtime' 'pnpm' @('--version')
-    Invoke-RuntimeCheck 'Java runtime' 'java' @('-version') 'version "21'
+    Invoke-RuntimeCheck 'Java runtime' 'java' @('-version') 'version "21' -SetJavaHome
 
     Invoke-Native 'Frontend dependencies' 'npm' @('ci', '--ignore-scripts') (Join-Path $repoRoot 'frontend')
     Invoke-Native 'Frontend lint' 'npm' @('run', 'lint') (Join-Path $repoRoot 'frontend')

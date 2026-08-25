@@ -24,7 +24,7 @@ Describe 'quality-gate contract' {
         $expectedPreflights = @(
             "Invoke-RuntimeCheck 'Node.js runtime' 'node' @('--version')",
             "Invoke-RuntimeCheck 'pnpm runtime' 'pnpm' @('--version')",
-            'Invoke-RuntimeCheck ''Java runtime'' ''java'' @(''-version'') ''version "21'''
+            'Invoke-RuntimeCheck ''Java runtime'' ''java'' @(''-version'') ''version "21'' -SetJavaHome'
         )
 
         $expectedPreflights | ForEach-Object { $script | Should Match ([regex]::Escape($_)) }
@@ -88,6 +88,61 @@ exit /b 0
         }
         finally {
             $env:PATH = $originalPath
+            Remove-Item -LiteralPath $temporaryRepo -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'derives JAVA_HOME from the Java runtime before Maven runs' {
+        $temporaryRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("quality-gate-test-" + [guid]::NewGuid())
+        $mockBin = Join-Path $temporaryRepo 'mock-bin'
+        $mockJdk = Join-Path $temporaryRepo 'mock-jdk'
+        $originalPath = $env:PATH
+        $originalJavaHome = $env:JAVA_HOME
+        $pwshPath = (Get-Command pwsh).Source
+        try {
+            New-Item -ItemType Directory -Path (Join-Path $temporaryRepo 'scripts'), (Join-Path $temporaryRepo 'frontend'), (Join-Path $temporaryRepo 'admin-web'), (Join-Path $temporaryRepo 'backend'), $mockBin, (Join-Path $mockJdk 'bin') -Force | Out-Null
+            Copy-Item (Join-Path $PSScriptRoot 'quality-gate.ps1') (Join-Path $temporaryRepo 'scripts/quality-gate.ps1')
+            @'
+@echo off
+exit /b 0
+'@ | Set-Content -Path (Join-Path $mockBin 'git.cmd')
+            @'
+@echo off
+echo v22.22.2
+exit /b 0
+'@ | Set-Content -Path (Join-Path $mockBin 'node.cmd')
+            @'
+@echo off
+echo 11.3.0
+exit /b 0
+'@ | Set-Content -Path (Join-Path $mockBin 'pnpm.cmd')
+            @'
+@echo off
+exit /b 0
+'@ | Set-Content -Path (Join-Path $mockBin 'npm.cmd')
+            @'
+@echo off
+echo java version "21.0.12"
+exit /b 0
+'@ | Set-Content -Path (Join-Path $mockJdk 'bin/java.cmd')
+            @'
+@echo off
+if not "%JAVA_HOME%"=="" exit /b 0
+echo JAVA_HOME was not set
+exit /b 1
+'@ | Set-Content -Path (Join-Path $temporaryRepo 'backend/mvnw.cmd')
+
+            $env:PATH = "$mockBin;$(Join-Path $mockJdk 'bin');$env:SystemRoot\System32"
+            $env:JAVA_HOME = ''
+            $result = & $pwshPath -NoProfile -File (Join-Path $temporaryRepo 'scripts/quality-gate.ps1') 2>&1
+
+            ($result | Out-String) | Should Match 'QUALITY GATE PASSED'
+            ($result | Out-String) | Should Match ([regex]::Escape("JAVA_HOME: $mockJdk"))
+            $LASTEXITCODE | Should Be 0
+        }
+        finally {
+            $env:PATH = $originalPath
+            $env:JAVA_HOME = $originalJavaHome
             Remove-Item -LiteralPath $temporaryRepo -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
