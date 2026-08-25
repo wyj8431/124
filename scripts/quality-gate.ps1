@@ -50,7 +50,24 @@ function Invoke-RuntimeCheck {
         }
 
         if ($SetJavaHome -and [string]::IsNullOrWhiteSpace($env:JAVA_HOME)) {
-            $env:JAVA_HOME = Split-Path -Parent (Split-Path -Parent $command.Source)
+            $javaSettings = & $command.Source '-XshowSettings:properties' '-version' 2>&1
+            $javaSettingsExitCode = $LASTEXITCODE
+            $javaSettings | ForEach-Object { Write-Host $_ }
+            if ($javaSettingsExitCode -ne 0) {
+                throw "$Name could not report java.home; the settings command failed with exit code $javaSettingsExitCode."
+            }
+
+            $javaHomeMatch = [regex]::Match(($javaSettings | Out-String), '(?m)^\s*java\.home\s*=\s*(.+?)\s*$')
+            if (-not $javaHomeMatch.Success) {
+                throw "$Name could not report java.home. Install a JDK 21 and set JAVA_HOME explicitly."
+            }
+
+            $javaHome = $javaHomeMatch.Groups[1].Value.Trim()
+            if (-not (Test-Path -LiteralPath (Join-Path $javaHome 'bin\javac.exe') -PathType Leaf)) {
+                throw "$Name found java.home '$javaHome', but it is not a JDK with bin\\javac.exe."
+            }
+
+            $env:JAVA_HOME = $javaHome
             Write-Host "JAVA_HOME: $env:JAVA_HOME"
         }
     }

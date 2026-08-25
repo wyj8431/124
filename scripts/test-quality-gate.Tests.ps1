@@ -93,14 +93,15 @@ exit /b 0
     }
 
     It 'derives JAVA_HOME from the Java runtime before Maven runs' {
-        $temporaryRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("quality-gate-test-" + [guid]::NewGuid())
+        $temporaryRepo = Join-Path $env:SystemDrive ("quality-gate-test-" + [guid]::NewGuid())
         $mockBin = Join-Path $temporaryRepo 'mock-bin'
+        $mockJavaShim = Join-Path $temporaryRepo 'mock-java-shim'
         $mockJdk = Join-Path $temporaryRepo 'mock-jdk'
         $originalPath = $env:PATH
         $originalJavaHome = $env:JAVA_HOME
         $pwshPath = (Get-Command pwsh).Source
         try {
-            New-Item -ItemType Directory -Path (Join-Path $temporaryRepo 'scripts'), (Join-Path $temporaryRepo 'frontend'), (Join-Path $temporaryRepo 'admin-web'), (Join-Path $temporaryRepo 'backend'), $mockBin, (Join-Path $mockJdk 'bin') -Force | Out-Null
+            New-Item -ItemType Directory -Path (Join-Path $temporaryRepo 'scripts'), (Join-Path $temporaryRepo 'frontend'), (Join-Path $temporaryRepo 'admin-web'), (Join-Path $temporaryRepo 'backend'), $mockBin, (Join-Path $mockJavaShim 'bin'), (Join-Path $mockJdk 'bin') -Force | Out-Null
             Copy-Item (Join-Path $PSScriptRoot 'quality-gate.ps1') (Join-Path $temporaryRepo 'scripts/quality-gate.ps1')
             @'
 @echo off
@@ -120,11 +121,14 @@ exit /b 0
 @echo off
 exit /b 0
 '@ | Set-Content -Path (Join-Path $mockBin 'npm.cmd')
-            @'
+            $javaShimSource = (@'
 @echo off
 echo java version "21.0.12"
+echo     java.home = {0}
 exit /b 0
-'@ | Set-Content -Path (Join-Path $mockJdk 'bin/java.cmd')
+'@ -f $mockJdk) -replace "`n", "`r`n"
+            Set-Content -Path (Join-Path $mockJavaShim 'bin/java.cmd') -Value $javaShimSource -NoNewline -Encoding ascii
+            New-Item -ItemType File -Path (Join-Path $mockJdk 'bin/javac.exe') | Out-Null
             @'
 @echo off
 if not "%JAVA_HOME%"=="" exit /b 0
@@ -132,7 +136,7 @@ echo JAVA_HOME was not set
 exit /b 1
 '@ | Set-Content -Path (Join-Path $temporaryRepo 'backend/mvnw.cmd')
 
-            $env:PATH = "$mockBin;$(Join-Path $mockJdk 'bin');$env:SystemRoot\System32"
+            $env:PATH = "$mockBin;$(Join-Path $mockJavaShim 'bin');$(Join-Path $mockJdk 'bin');$env:SystemRoot\System32"
             $env:JAVA_HOME = ''
             $result = & $pwshPath -NoProfile -File (Join-Path $temporaryRepo 'scripts/quality-gate.ps1') 2>&1
 
