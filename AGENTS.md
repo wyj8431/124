@@ -11,8 +11,8 @@ Use sub-agents proactively only when the task has independent, bounded parts tha
 ## Before Work
 
 - Read the repository guidance and the relevant installed skills before changing code.
-- For any new feature, behavior change, or bug fix, use the `superpowers` workflow: `superpowers:brainstorming`, obtain user confirmation, then `superpowers:writing-plans`.
 - Every multi-step task, including features, refactors, documentation, and infrastructure work, must leave a design document under `docs/superpowers/specs/` and an implementation plan under `docs/superpowers/plans/` before implementation.
+- For every multi-step task, including features, refactors, documentation, and infrastructure work, follow this sequence: `superpowers:brainstorming` -> user confirmation -> `superpowers:writing-plans`.
 - Treat the approved plan and the user's latest request as the source of truth. Do not infer unrelated scope.
 
 ## Implementation Contract
