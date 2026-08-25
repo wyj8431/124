@@ -18,6 +18,7 @@ public class UserDesign {
     private Long templateId;
     private Long folderId;
     private String canvasJson;
+    private Long revision;
     private Integer width;
     private Integer height;
     private Integer status;
