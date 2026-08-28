@@ -26,7 +26,7 @@ const OTHER_LOGINS = [
 type View = 'qrcode' | 'password' | 'register' | 'forgot'
 
 export function LoginModal() {
-  const { showLoginModal, setShowLoginModal, login, resetPassword } = useAuth()
+  const { showLoginModal, setShowLoginModal, login, loginByWechat, resetPassword } = useAuth()
   const [view, setView] = useState<View>('qrcode')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -103,7 +103,7 @@ export function LoginModal() {
                   <Monitor className="h-5 w-5 text-ckt-primary" />
                 </button>
                 <div className="flex h-full flex-col overflow-y-auto px-10 pb-6 pt-12">
-                  <QrLoginView onPhoneLogin={goLogin} onRegister={goRegister} />
+                  <QrLoginView onPhoneLogin={goLogin} onRegister={goRegister} onWechatLogin={loginByWechat} />
                 </div>
               </>
             )}
@@ -224,10 +224,14 @@ function LoginFooter({ onRegister }: { onRegister: () => void }) {
 function QrLoginView({
   onPhoneLogin,
   onRegister,
+  onWechatLogin,
 }: {
   onPhoneLogin: () => void
   onRegister: () => void
+  onWechatLogin: (code: string) => Promise<void>
 }) {
+  const [wechatError, setWechatError] = useState('')
+  const [wechatLoading, setWechatLoading] = useState(false)
   const qrUrl = useMemo(
     () => 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=chuangkit-wechat-login',
     [],
@@ -244,9 +248,25 @@ function QrLoginView({
         <img src={qrUrl} alt="微信扫码登录" className="h-[150px] w-[150px]" />
       </div>
 
-      <button className="mt-3 text-xs text-ckt-primary hover:underline">
-        扫码登录遇到问题？<span className="font-medium">点击这里</span>
+      <button
+        type="button"
+        className="mt-3 text-xs text-ckt-primary hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={wechatLoading}
+        onClick={async () => {
+          setWechatError('')
+          setWechatLoading(true)
+          try {
+            await onWechatLogin('demo-wechat-scan')
+          } catch (error) {
+            setWechatError(error instanceof Error ? error.message : '微信登录失败')
+          } finally {
+            setWechatLoading(false)
+          }
+        }}
+      >
+        {wechatLoading ? '正在确认扫码...' : '模拟扫码登录'}
       </button>
+      {wechatError ? <p role="alert" className="mt-2 text-xs text-red-500">{wechatError}</p> : null}
 
       <div className="mt-5 w-full">
         <div className="mb-4 flex items-center gap-3">

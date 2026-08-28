@@ -1,0 +1,63 @@
+<h2>左侧栏要优先扩展哪一层？</h2>
+<p class="subtitle">现有编辑器已有“素材”入口和搜索。选择下列结构之一，决定新增内容如何组织。</p>
+
+<div class="cards">
+  <article class="card" data-choice="assets" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:18px;background:#f4f7fb">
+      <div style="display:flex;height:240px;overflow:hidden;border:1px solid #dce3ef;border-radius:6px;background:#fff;text-align:left">
+        <nav style="width:62px;padding:10px 6px;border-right:1px solid #e6eaf1;color:#5e6c84;font-size:9px;line-height:2.3;text-align:center">添加<br>模板<br><b style="color:#086efa">素材</b><br>文字<br>图片<br>背景<br>组件<br>AI工具</nav>
+        <section style="flex:1;padding:12px;color:#26354e;font-size:10px">
+          <strong style="font-size:14px">素材</strong>
+          <div style="margin:10px 0;padding:8px;border-radius:5px;background:#f0f4fb;color:#8a96aa">搜索素材</div>
+          <div style="display:flex;gap:9px;border-bottom:1px solid #e8edf4;padding-bottom:7px"><b>素材</b><span>图片</span><span>视频</span><span>音频</span></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:10px"><i style="padding:6px 2px;border-radius:4px;background:#3d82f6;color:#fff;font-style:normal">形状</i><i style="padding:6px 2px;border-radius:4px;background:#ee6ca8;color:#fff;font-style:normal">线条</i><i style="padding:6px 2px;border-radius:4px;background:#ff8c68;color:#fff;font-style:normal">插画</i><i style="padding:6px 2px;border-radius:4px;background:#f4a13a;color:#fff;font-style:normal">容器</i><i style="padding:6px 2px;border-radius:4px;background:#39bf9f;color:#fff;font-style:normal">边框</i><i style="padding:6px 2px;border-radius:4px;background:#38a9ed;color:#fff;font-style:normal">图标</i><i style="padding:6px 2px;border-radius:4px;background:#9b5cf1;color:#fff;font-style:normal">贴纸</i><i style="padding:6px 2px;border-radius:4px;background:#62748e;color:#fff;font-style:normal">动图</i></div>
+          <p style="margin:13px 0 6px;font-weight:700">热门分类</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><span style="height:46px;border-radius:5px;background:#dceafd"></span><span style="height:46px;border-radius:5px;background:#fde1ed"></span><span style="height:46px;border-radius:5px;background:#ffecce"></span></div>
+        </section>
+      </div>
+    </div>
+    <div class="card-body"><h3>A. 素材优先</h3><p>保留现有工具栏，丰富素材分类、热门合集和筛选。</p></div>
+  </article>
+
+  <article class="card" data-choice="tools" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:18px;background:#f4f7fb">
+      <div style="display:flex;height:240px;overflow:hidden;border:1px solid #dce3ef;border-radius:6px;background:#fff;text-align:left">
+        <nav style="width:86px;padding:12px 8px;color:#4c5c77;font-size:10px;line-height:2.05">
+          <div style="padding:5px 7px;border-radius:5px;background:#edf6ff;color:#086efa">＋ 添加</div>
+          <div style="padding:5px 7px">◎ 我的</div>
+          <div style="padding:5px 7px">▦ 模板</div>
+          <div style="padding:5px 7px">◇ 素材</div>
+          <div style="padding:5px 7px">T 文字</div>
+          <div style="padding:5px 7px">▧ 品牌库</div>
+          <div style="padding:5px 7px">✦ AI 创作</div>
+          <div style="padding:5px 7px">♧ 团队</div>
+        </nav>
+        <section style="flex:1;padding:14px;color:#26354e;font-size:11px">
+          <strong style="font-size:14px">添加</strong>
+          <p style="margin-top:14px">图片 / 视频</p>
+          <div style="display:flex;gap:6px"><button style="border:1px solid #d5ddea;border-radius:4px;background:#fff;padding:7px;color:#51617a">本地上传</button><button style="border:1px solid #d5ddea;border-radius:4px;background:#fff;padding:7px;color:#51617a">手机上传</button></div>
+          <p style="margin-top:14px">常用操作</p>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px"><span style="padding:9px;border-radius:4px;background:#f0f4fb">调整尺寸</span><span style="padding:9px;border-radius:4px;background:#f0f4fb">生成二维码</span><span style="padding:9px;border-radius:4px;background:#f0f4fb">品牌颜色</span><span style="padding:9px;border-radius:4px;background:#f0f4fb">智能排版</span></div>
+        </section>
+      </div>
+    </div>
+    <div class="card-body"><h3>B. 工具优先</h3><p>在主工具栏新增品牌库、AI 创作和常用设计功能。</p></div>
+  </article>
+
+  <article class="card" data-choice="hybrid" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:18px;background:#f4f7fb">
+      <div style="display:flex;height:240px;overflow:hidden;border:1px solid #dce3ef;border-radius:6px;background:#fff;text-align:left">
+        <nav style="width:62px;padding:10px 6px;border-right:1px solid #e6eaf1;color:#5e6c84;font-size:9px;line-height:2.3;text-align:center">添加<br>模板<br><b style="color:#086efa">素材</b><br>文字<br>图片<br>品牌<br>AI创作<br>团队</nav>
+        <section style="flex:1;padding:12px;color:#26354e;font-size:10px">
+          <div style="display:flex;justify-content:space-between"><strong style="font-size:14px">素材</strong><span style="color:#7d8aa0">收藏</span></div>
+          <div style="margin:10px 0;padding:8px;border-radius:5px;background:#f0f4fb;color:#8a96aa">搜索素材</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px"><i style="padding:6px 2px;border-radius:4px;background:#3d82f6;color:#fff;font-style:normal">形状</i><i style="padding:6px 2px;border-radius:4px;background:#ee6ca8;color:#fff;font-style:normal">插画</i><i style="padding:6px 2px;border-radius:4px;background:#39bf9f;color:#fff;font-style:normal">图标</i><i style="padding:6px 2px;border-radius:4px;background:#9b5cf1;color:#fff;font-style:normal">贴纸</i></div>
+          <p style="margin:13px 0 6px;font-weight:700">推荐给你</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><span style="height:46px;border-radius:5px;background:#dceafd"></span><span style="height:46px;border-radius:5px;background:#fde1ed"></span><span style="height:46px;border-radius:5px;background:#ffecce"></span></div>
+          <p style="margin:12px 0 0;color:#718099">公开目录同步 · 版权状态单独标注</p>
+        </section>
+      </div>
+    </div>
+    <div class="card-body"><h3>C. 综合升级</h3><p>工具栏补齐关键入口，同时把公开素材目录做成可搜索的分类与合集。</p></div>
+  </article>
+</div>

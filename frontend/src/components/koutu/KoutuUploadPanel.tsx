@@ -1,16 +1,32 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState, type ChangeEvent, type DragEvent } from 'react'
 import { CircleHelp } from 'lucide-react'
 import {
+  KOUTU_DEMO_POSTER,
   KOUTU_DEMO_VIDEO,
   KOUTU_SAMPLE_IMAGES,
   KOUTU_UPLOAD_HINT,
 } from '@/data/koutuPageData'
 
+export const KOUTU_MAX_IMAGE_SIZE = 5 * 1024 * 1024
+export const KOUTU_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif'] as const
+
 interface KoutuUploadPanelProps {
   onUploadFiles: (files: File[]) => void
+  onUploadError?: (message: string) => void
+  errorMessage?: string
 }
 
-export function KoutuUploadPanel({ onUploadFiles }: KoutuUploadPanelProps) {
+function validateFile(file: File): string | null {
+  if (!KOUTU_IMAGE_TYPES.includes(file.type as (typeof KOUTU_IMAGE_TYPES)[number])) {
+    return `${file.name}：图片类型不受支持`
+  }
+  if (file.size <= 0 || file.size > KOUTU_MAX_IMAGE_SIZE) {
+    return `${file.name}：文件大小不能超过 5MB`
+  }
+  return null
+}
+
+export function KoutuUploadPanel({ onUploadFiles, onUploadError, errorMessage }: KoutuUploadPanelProps) {
   const singleInputRef = useRef<HTMLInputElement>(null)
   const batchInputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
@@ -19,16 +35,31 @@ export function KoutuUploadPanel({ onUploadFiles }: KoutuUploadPanelProps) {
     (fileList: FileList | null, multiple: boolean) => {
       if (!fileList?.length) return
       const files = multiple ? Array.from(fileList) : [fileList[0]]
-      onUploadFiles(files)
+      const errors: string[] = []
+      const validFiles = files.filter((file) => {
+        const error = validateFile(file)
+        if (error) errors.push(error)
+        return !error
+      })
+      if (errors.length) onUploadError?.(errors.join('；'))
+      if (validFiles.length) onUploadFiles(validFiles)
     },
-    [onUploadFiles],
+    [onUploadError, onUploadFiles],
+  )
+
+  const handleInputChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>, multiple: boolean) => {
+      handleFiles(event.target.files, multiple)
+      event.target.value = ''
+    },
+    [handleFiles],
   )
 
   const handleDrop = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
+    (event: DragEvent<HTMLDivElement>) => {
       event.preventDefault()
       setDragging(false)
-      handleFiles(event.dataTransfer.files, false)
+      handleFiles(event.dataTransfer.files, true)
     },
     [handleFiles],
   )
@@ -43,7 +74,7 @@ export function KoutuUploadPanel({ onUploadFiles }: KoutuUploadPanelProps) {
 
       <div className="tool-upload-assembly__content">
         <div className="koutu-content__left">
-          <video autoPlay loop muted playsInline poster="">
+          <video autoPlay loop muted playsInline poster={KOUTU_DEMO_POSTER}>
             <source src={KOUTU_DEMO_VIDEO} type="video/mp4" />
           </video>
         </div>
@@ -76,6 +107,8 @@ export function KoutuUploadPanel({ onUploadFiles }: KoutuUploadPanelProps) {
                 </button>
               </div>
               <p className="koutu-default-top__hint">{KOUTU_UPLOAD_HINT}</p>
+              <p className="koutu-dropzone__drag-hint">{dragging ? '松开鼠标开始处理' : '也可以将图片拖到这里'}</p>
+              {errorMessage ? <p className="koutu-upload-error" role="alert">{errorMessage}</p> : null}
             </div>
 
             <div className="koutu-default-line">
@@ -98,7 +131,7 @@ export function KoutuUploadPanel({ onUploadFiles }: KoutuUploadPanelProps) {
                           onUploadFiles([file])
                         })
                         .catch(() => {
-                          window.open(url, '_blank', 'noopener,noreferrer')
+                          onUploadError?.('示例图片加载失败，请重新选择本地图片')
                         })
                     }}
                   />
@@ -111,21 +144,21 @@ export function KoutuUploadPanel({ onUploadFiles }: KoutuUploadPanelProps) {
             ref={singleInputRef}
             className="koutu-hidden-input"
             type="file"
-            accept="image/jpeg,image/png,image/jpg"
-            onChange={(event) => handleFiles(event.target.files, false)}
+            accept="image/jpeg,image/png,image/gif"
+            onChange={(event) => handleInputChange(event, false)}
           />
           <input
             ref={batchInputRef}
             className="koutu-hidden-input"
             type="file"
-            accept="image/jpeg,image/png,image/jpg"
+            accept="image/jpeg,image/png,image/gif"
             multiple
-            onChange={(event) => handleFiles(event.target.files, true)}
+            onChange={(event) => handleInputChange(event, true)}
           />
         </div>
       </div>
 
-      <button type="button" className="koutu-help-icon" aria-label="帮助">
+      <button type="button" className="koutu-help-icon" aria-label="帮助" title="帮助">
         <CircleHelp className="h-4 w-4" />
       </button>
     </div>

@@ -39,8 +39,8 @@ public class DesignController {
 
     /** 保存设计 — 编辑器 autosave 调用，canvasJson 持久化到数据库 */
     @PutMapping("/{id}")
-    public Result<UserDesign> save(@PathVariable Long id, @RequestBody DesignSaveRequest req) {
-        return Result.ok(designService.save(id, SecurityUtils.requireUserId(), req));
+    public Result<UserDesign> save(@PathVariable Long id, @RequestParam(required = false) String shareToken, @RequestBody DesignSaveRequest req) {
+        return Result.ok(designService.save(id, SecurityUtils.requireUserId(), req, shareToken));
     }
 
     @DeleteMapping("/{id}")

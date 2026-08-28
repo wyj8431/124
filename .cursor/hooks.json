@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "node scripts/codex-code-review-hook.mjs --event afterFileEdit"
+      }
+    ]
+  }
+}

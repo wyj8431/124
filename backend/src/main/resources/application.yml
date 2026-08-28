@@ -8,6 +8,10 @@ spring:
     name: chuangkit-admin
   profiles:
     active: dev
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
@@ -50,12 +54,16 @@ chuangkit:
   jwt:
     secret: chuangkit-admin-jwt-secret-key-2026-change-in-production
     expiration-ms: 86400000
+    refresh-expiration-ms: 604800000
   upload:
     base-url: http://localhost:8081/uploads
   ai:
-    provider: ${AI_PROVIDER:mock}
     endpoint: ${AI_PROVIDER_ENDPOINT:}
     api-key: ${AI_PROVIDER_API_KEY:}
+    model: ${AI_PROVIDER_MODEL:}
+    mock:
+      enabled: ${AI_MATTING_MOCK_ENABLED:true}
+      delay-ms: ${AI_MATTING_MOCK_DELAY_MS:1200}
   sms:
     provider: ${SMS_PROVIDER:mock}
     code-expire-minutes: 5

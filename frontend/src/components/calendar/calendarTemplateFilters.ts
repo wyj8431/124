@@ -10,15 +10,17 @@ export const CALENDAR_SCENE_TABS: CalendarSceneTab[] = [
   { code: 'mobile_poster', label: '手机海报' },
   { code: 'wechat_cover', label: '公众号首图' },
   { code: 'vertical_poster', label: '竖版海报' },
-  { code: 'long_poster', label: '长图海报' },
   { code: 'horizontal_poster', label: '横版海报' },
   { code: 'wechat_sub', label: '公众号次图' },
   { code: 'fullscreen_poster', label: '全屏海报' },
-  { code: 'square_poster', label: '方形海报' },
-  { code: 'xiaohongshu', label: '小红书配图' },
-  { code: 'moments_cover', label: '朋友圈封面' },
   { code: 'vertical_illustration', label: '竖版插画' },
-  { code: 'illustration', label: '插画元素' },
+  { code: 'long_poster', label: '长图海报' },
+  { code: 'square_poster', label: '方形海报' },
+  { code: 'mobile_wallpaper', label: '手机壁纸' },
+  { code: 'horizontal_illustration', label: '横版插画' },
+  { code: 'square_illustration', label: '方形配图' },
+  { code: 'handwritten_poster', label: '手抄报' },
+  { code: 'xiaohongshu', label: '小红书配图' },
 ]
 
 /** 设计场景 ID，与 backend data.sql 插入顺序一致 */
@@ -68,8 +70,14 @@ export function filterCalendarTemplates(templates: DesignTemplate[], tabCode: st
         return r >= 0.9 && r <= 1.1 && t.width >= 1000
       case 'vertical_illustration':
         return t.height > t.width && t.tags?.includes('插画')
-      case 'illustration':
-        return Boolean(t.tags?.includes('插画') || t.tags?.includes('元素'))
+      case 'mobile_wallpaper':
+        return t.height > t.width && t.height / t.width >= 1.65
+      case 'horizontal_illustration':
+        return t.width > t.height && Boolean(t.tags?.includes('插画') || t.tags?.includes('横版'))
+      case 'square_illustration':
+        return Math.abs(r - 1) <= 0.15 && Boolean(t.tags?.includes('插画') || t.tags?.includes('配图'))
+      case 'handwritten_poster':
+        return Boolean(t.tags?.includes('手抄报'))
       default:
         return true
     }

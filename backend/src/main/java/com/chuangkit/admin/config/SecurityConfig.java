@@ -6,12 +6,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -20,6 +23,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -40,8 +44,6 @@ public class SecurityConfig {
                     "/admin/scenes/**",
                     "/admin/categories/**",
                     "/admin/materials/**",
-                    "/admin/ai-tools/**",
-                    "/admin/ai/**",
                     "/uploads/**",
                     "/admin/calendar/**",
                     "/admin/collections/**",
@@ -51,9 +53,26 @@ public class SecurityConfig {
                     "/admin/swagger-ui/**",
                     "/admin/v3/api-docs/**"
                 ).permitAll()
+                .requestMatchers(HttpMethod.GET, "/admin/design-shares/**").permitAll()
                 .requestMatchers("/admin/admin/**").hasRole("ADMIN")
-                .requestMatchers("/admin/designs/**", "/admin/user/**", "/admin/ai-tasks/**", "/admin/my-design/**", "/admin/enterprise/**", "/admin/member/checkout/**", "/admin/order-center/**", "/admin/auth-record/**", "/admin/message-center/**", "/admin/coupon-center/**", "/admin/team-upgrade/submit", "/admin/usage/**", "/admin/teams/**", "/admin/support/**", "/admin/device-alerts/**").authenticated()
+                .requestMatchers("/admin/ai/**", "/admin/ai-tools/**").hasRole("ADMIN")
+                // AI 抠图属于管理员能力；前端隐藏入口之外，接口也必须拒绝普通用户绕过调用。
+                .requestMatchers("/admin/matting/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/admin/templates/*/use", "/admin/ai/**").hasRole("ADMIN")
+                .requestMatchers("/admin/designs/**", "/admin/design-shares/**", "/admin/collaboration/**", "/admin/user/**", "/admin/ai-tasks/**", "/admin/matting/**", "/admin/my-design/**", "/admin/enterprise/**", "/admin/member/checkout/**", "/admin/order-center/**", "/admin/auth-record/**", "/admin/message-center/**", "/admin/coupon-center/**", "/admin/team-upgrade/submit", "/admin/usage/**", "/admin/teams/**", "/admin/support/**", "/admin/device-alerts/**").authenticated()
                 .anyRequest().permitAll()
+            )
+            .exceptionHandling(e -> e
+                .authenticationEntryPoint((request, response, exception) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"code\":401,\"message\":\"请先登录\"}");
+                })
+                .accessDeniedHandler((request, response, exception) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"code\":403,\"message\":\"没有权限执行此操作\"}");
+                })
             )
             .headers(h -> h.frameOptions(f -> f.sameOrigin()))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

@@ -94,8 +94,7 @@ public class AiTopicService {
             genReq.setToolCode("ai_video");
         }
 
-        Long userId = SecurityUtils.currentUserId();
-        return aiGenerateService.generate(userId, genReq);
+        return aiGenerateService.generate(SecurityUtils.requireUserId(), genReq);
     }
 
     private AiTopicPage requirePage(String code) {

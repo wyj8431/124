@@ -1,0 +1,48 @@
+<h2>编辑器空面板的布局方向</h2>
+<p class="subtitle">艺术字使用官网公开的 24 条本地快照；品牌和画笔是本地可编辑功能。</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup" style="margin:0;border:0;box-shadow:none">
+        <div class="mockup-header">推荐：独立面板 + 紧凑网格</div>
+        <div class="mockup-body" style="padding:14px;background:#f8fafc">
+          <div style="font:700 14px sans-serif;color:#18253a;margin-bottom:8px">文字</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px"><button class="mock-button">标题</button><button class="mock-button">副标题</button><button class="mock-button">正文</button></div>
+          <div style="font:700 12px sans-serif;color:#18253a;margin-bottom:6px">官网公开艺术字</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><div class="placeholder" style="height:46px">SALE</div><div class="placeholder" style="height:46px">夏日</div><div class="placeholder" style="height:46px">新品</div></div>
+          <div style="height:12px"></div>
+          <div style="font:700 14px sans-serif;color:#18253a;margin-bottom:8px">品牌</div>
+          <div style="display:flex;gap:8px"><span style="width:25px;height:25px;border-radius:4px;background:#0b72f8"></span><span style="width:25px;height:25px;border-radius:4px;background:#ff6b4a"></span><span style="width:25px;height:25px;border-radius:4px;background:#21a179"></span><span style="width:25px;height:25px;border-radius:4px;background:#111827"></span></div>
+          <div style="height:12px"></div>
+          <div style="font:700 14px sans-serif;color:#18253a;margin-bottom:8px">画笔</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div class="mock-input">颜色</div><div class="mock-input">粗细 8 px</div><div class="mock-input">不透明度 100%</div><button class="mock-button">开始绘制</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body"><h3>方案 A：保持现有工具栏结构</h3><p>每个工具独立打开。艺术字以预览网格显示；品牌和画笔提供直接可操作的控制项，适合频繁编辑。</p></div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup" style="margin:0;border:0;box-shadow:none">
+        <div class="mockup-header">备选：大卡片 + 分组设置</div>
+        <div class="mockup-body" style="padding:14px;background:#f8fafc">
+          <div style="font:700 14px sans-serif;color:#18253a;margin-bottom:8px">文字样式</div>
+          <div class="placeholder" style="height:56px;margin-bottom:8px">大标题样式</div>
+          <div class="placeholder" style="height:56px;margin-bottom:12px">正文样式</div>
+          <div style="font:700 12px sans-serif;color:#18253a;margin-bottom:6px">艺术字资源</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="placeholder" style="height:70px">活动</div><div class="placeholder" style="height:70px">促销</div></div>
+          <div style="height:12px"></div>
+          <div class="placeholder" style="height:44px">品牌色板与画笔设置</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body"><h3>方案 B：强调单次选择</h3><p>卡片更大、选项更少，但品牌与画笔需要再进入二级区域，画布编辑时切换会更慢。</p></div>
+  </div>
+</div>
+
+<div class="pros-cons">
+  <div class="pros"><h4>推荐 A</h4><ul><li>匹配现有左侧独立工具入口</li><li>资源和控制项都能一次看到</li><li>窄屏仍可采用稳定的两列网格</li></ul></div>
+  <div class="cons"><h4>方案 B 的代价</h4><ul><li>资源密度较低</li><li>品牌与画笔的操作路径更长</li></ul></div>
+</div>

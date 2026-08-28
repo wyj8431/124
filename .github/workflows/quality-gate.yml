@@ -3,6 +3,7 @@ name: quality-gate
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -47,9 +48,30 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Validate commit messages on pull requests
+        if: github.event_name == 'pull_request'
+        shell: pwsh
+        run: ./scripts/check-commit-messages.ps1 -BaseRef "origin/${{ github.base_ref }}"
+
+      - name: Validate commit messages on pushes
+        if: github.event_name == 'push'
+        shell: pwsh
+        run: ./scripts/check-commit-messages.ps1 -BaseRef "${{ github.event.before }}"
+
+      - name: Resolve review base
+        id: review-base
+        shell: pwsh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          $base = if ($env:EVENT_NAME -eq 'pull_request') { "origin/$env:BASE_REF" } elseif ($env:EVENT_NAME -eq 'push') { $env:BEFORE_SHA } else { '' }
+          "ref=$base" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
       - name: Run shared quality gate
         shell: pwsh
-        run: ./scripts/quality-gate.ps1
+        run: ./scripts/quality-gate.ps1 -ReviewBaseRef "${{ steps.review-base.outputs.ref }}"
 
       - name: Check high-risk evidence
         if: github.event_name == 'pull_request'

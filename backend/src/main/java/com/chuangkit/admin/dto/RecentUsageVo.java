@@ -10,4 +10,6 @@ public class RecentUsageVo {
     private String name;
     private String icon;
     private String coverUrl;
+    private Integer width;
+    private Integer height;
 }

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -eu
+
+review_base="${GATE_REVIEW_BASE:-origin/main}"
+if ! git rev-parse --verify "$review_base" >/dev/null 2>&1; then
+  echo "Quality gate requires a valid review base: $review_base" >&2
+  echo "Fetch the base branch or set GATE_REVIEW_BASE before pushing." >&2
+  exit 1
+fi
+
+pwsh -NoProfile -File scripts/quality-gate.ps1 -ReviewBaseRef "$review_base"

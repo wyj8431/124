@@ -19,6 +19,16 @@ public class AuthController {
         return Result.ok(authService.login(req));
     }
 
+    @PostMapping("/refresh")
+    public Result<AuthDto.AuthResponse> refresh(@Valid @RequestBody AuthDto.RefreshTokenRequest req) {
+        return Result.ok(authService.refresh(req.getRefreshToken()));
+    }
+
+    @PostMapping("/wechat/login")
+    public Result<AuthDto.AuthResponse> wechatLogin(@Valid @RequestBody AuthDto.WechatLoginRequest req) {
+        return Result.ok(authService.loginByWechat(req.getCode()));
+    }
+
     @PostMapping("/register")
     public Result<AuthDto.AuthResponse> register(@Valid @RequestBody AuthDto.RegisterRequest req) {
         return Result.ok(authService.register(req));

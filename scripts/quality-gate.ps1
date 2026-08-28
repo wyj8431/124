@@ -1,5 +1,7 @@
 [CmdletBinding()]
-param()
+param(
+    [string]$ReviewBaseRef
+)
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -76,18 +78,31 @@ function Invoke-RuntimeCheck {
 Push-Location $repoRoot
 try {
     Invoke-Native 'Whitespace check' 'git' @('diff', '--check') $repoRoot
+    $reviewArguments = @('scripts/codex-code-review.mjs', '--scope', 'changed-files', '--format', 'json', '--severity', 'medium')
+    if (-not [string]::IsNullOrWhiteSpace($ReviewBaseRef)) {
+        $reviewArguments += @('--base', $ReviewBaseRef)
+    }
+    Invoke-Native 'Codex code review' 'node' $reviewArguments $repoRoot
 
-    Invoke-RuntimeCheck 'Node.js runtime' 'node' @('--version')
-    Invoke-RuntimeCheck 'pnpm runtime' 'pnpm' @('--version')
+    Invoke-RuntimeCheck 'Node.js runtime' 'node' @('--version') '^v22\.'
+    Invoke-RuntimeCheck 'pnpm runtime' 'pnpm' @('--version') '^11\.3\.'
     Invoke-RuntimeCheck 'Java runtime' 'java' @('-version') 'version "21' -SetJavaHome
+    $governanceTestFiles = @(
+        'cursor-skills/code-review/test/automatic-hook.test.mjs',
+        'cursor-skills/code-review/test/codex-integration.test.mjs',
+        'cursor-skills/code-review/test/review-engine.test.mjs',
+        'scripts/codex-code-review.test.mjs',
+        'scripts/install-code-review-hooks.test.mjs'
+    )
+    Invoke-Native 'Governance tests' 'node' (@('--test') + $governanceTestFiles) $repoRoot
 
-    Invoke-Native 'Frontend dependencies' 'npm' @('ci', '--ignore-scripts') (Join-Path $repoRoot 'frontend')
+    Invoke-Native 'Frontend dependencies' 'npm' @('ci', '--include=dev', '--ignore-scripts') (Join-Path $repoRoot 'frontend')
     Invoke-Native 'Frontend lint' 'npm' @('run', 'lint') (Join-Path $repoRoot 'frontend')
     Invoke-Native 'Frontend tests' 'npm' @('run', 'test') (Join-Path $repoRoot 'frontend')
     Invoke-Native 'Frontend build' 'npm' @('run', 'build') (Join-Path $repoRoot 'frontend')
     Invoke-Native 'Admin web dependencies' 'pnpm' @('install', '--frozen-lockfile') (Join-Path $repoRoot 'admin-web')
     Invoke-Native 'Admin web build' 'pnpm' @('run', 'build') (Join-Path $repoRoot 'admin-web')
-    Invoke-Native 'Backend Maven tests' '.\\mvnw.cmd' @('-q', 'test') (Join-Path $repoRoot 'backend')
+    Invoke-Native 'Backend Maven tests' '.\mvnw.cmd' @('-q', 'test') (Join-Path $repoRoot 'backend')
     Write-Host "`nQUALITY GATE PASSED" -ForegroundColor Green
 }
 catch {

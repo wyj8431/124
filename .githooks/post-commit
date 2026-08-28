@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Review the committed snapshot for a durable audit trail without blocking the commit.
+node scripts/codex-code-review-hook.mjs --base HEAD^ || true

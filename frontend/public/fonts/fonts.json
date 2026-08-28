@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "license": {
+    "name": "SIL Open Font License 1.1",
+    "spdx": "OFL-1.1",
+    "file": "/fonts/OFL-1.1.txt"
+  },
+  "screeningSources": [
+    {
+      "name": "字体家",
+      "url": "https://www.zitijia.com/t/%E5%85%8D%E8%B4%B9%E5%95%86%E7%94%A8",
+      "checkedAt": "2026-08-27",
+      "evidence": "免费商用说明将思源黑体列为无需授权即可商业使用的字体。"
+    },
+    {
+      "name": "字体天下",
+      "url": "https://www.fonts.net.cn/fonts-zh/tag-siyuan-1.html",
+      "checkedAt": "2026-08-27",
+      "evidence": "思源黑体与思源宋体条目均标为商用免费。"
+    },
+    {
+      "name": "100font",
+      "url": "https://www.100font.com/thread-98.htm",
+      "checkedAt": "2026-08-27",
+      "evidence": "思源宋体条目明确标注 SIL OFL 1.1，允许在系统、软件或 APP 中分发。"
+    },
+    {
+      "name": "Google Fonts",
+      "url": "https://fonts.google.com/",
+      "checkedAt": "2026-08-27",
+      "evidence": "新增展示字体均从 Google Fonts 官方 OFL 目录或其官方静态分发地址取得，并保留 SIL OFL 1.1 再分发许可。"
+    }
+  ],
+  "fonts": [
+    {
+      "family": "Source Han Sans SC",
+      "displayName": "思源黑体",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/source-han-sans-sc-regular.otf",
+      "sha256": "f1d8611151880c6c336aabeac4640ef434fa13cbfbf1ffe82d0a71b2a5637256",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [
+        { "name": "字体家", "url": "https://www.zitijia.com/t/%E5%85%8D%E8%B4%B9%E5%95%86%E7%94%A8" },
+        { "name": "字体天下", "url": "https://www.fonts.net.cn/fonts-zh/tag-siyuan-1.html" },
+        { "name": "100font", "url": "https://www.100font.com/thread-99.htm" }
+      ],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/adobe-fonts/source-han-sans/release/OTF/SimplifiedChinese/SourceHanSansSC-Regular.otf"
+    },
+    {
+      "family": "Source Han Serif SC",
+      "displayName": "思源宋体",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/source-han-serif-sc-regular.otf",
+      "sha256": "78aa7a328fd974df2d688c8a9fd74a33d8334dfa84ab24d9d11efb2ffc464117",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [
+        { "name": "字体天下", "url": "https://www.fonts.net.cn/fonts-zh/tag-siyuan-1.html" },
+        { "name": "100font", "url": "https://www.100font.com/thread-98.htm" }
+      ],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/adobe-fonts/source-han-serif/release/OTF/SimplifiedChinese/SourceHanSerifSC-Regular.otf"
+    },
+    {
+      "family": "ZCOOL KuaiLe",
+      "displayName": "站酷快乐体",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/zcool-kuaile-regular.ttf",
+      "sha256": "812a6fc1fe54b6d73a419245c32dfeba8aa33104d5be90d1cf6af082007cb71d",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [
+        { "name": "字体家", "url": "https://www.zitijia.com/t/%E5%85%8D%E8%B4%B9%E5%95%86%E7%94%A8" },
+        { "name": "100font", "url": "https://www.100font.com/thread-93.htm" }
+      ],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/googlefonts/zcool-kuaile/main/fonts/ttf/ZCOOLKuaiLe-Regular.ttf"
+    },
+    {
+      "family": "ZCOOL XiaoWei",
+      "displayName": "站酷小薇",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/zcool-xiaowei-regular.ttf",
+      "sha256": "a42b620140f493db42f741351dfbf343c0936d58588ee8004b8b2a218d997ff1",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [
+        { "name": "字体天下", "url": "https://www.fonts.net.cn/commercial-free/fonts-zh-1.html" },
+        { "name": "100font", "url": "https://www.100font.com/thread-90.htm" }
+      ],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/googlefonts/zcool-xiaowei/main/fonts/ZCOOLXiaoWei-Regular.ttf"
+    },
+    {
+      "family": "Ma Shan Zheng",
+      "displayName": "马善政毛笔楷书",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/ma-shan-zheng-regular.ttf",
+      "sha256": "6d2546bb189c732a8ca29af9e22457b152387d158aa459e4ac2ce1e51788b7fb",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [
+        { "name": "100font", "url": "https://www.100font.com/thread-430.htm" }
+      ],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/mashanzheng/MaShanZheng-Regular.ttf"
+    },
+    {
+      "family": "Long Cang",
+      "displayName": "有字库龙藏体",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/long-cang-regular.ttf",
+      "sha256": "e5bf2c3f24ef2327c6f136d8f73e2f9dfdf44896fdbeb35a9515f44777bb91bc",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [
+        { "name": "100font", "url": "https://www.100font.com/thread-428.htm" }
+      ],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/longcang/LongCang-Regular.ttf"
+    },
+    {
+      "family": "LXGW WenKai",
+      "displayName": "霞鹜文楷",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/lxgw-wenkai-regular.ttf",
+      "sha256": "39ad71264b588165b469e35e6afb162a378dacd1f95348160240ba9038ac3009",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [
+        { "name": "100font", "url": "https://www.100font.com/thread-1481.htm" }
+      ],
+      "officialDownloadUrl": "https://github.com/lxgw/LxgwWenKai/releases/download/v1.522/LXGWWenKai-Regular.ttf"
+    },
+    {
+      "family": "Smiley Sans Oblique",
+      "displayName": "得意黑",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/smiley-sans-oblique.ttf",
+      "sha256": "b447d7e781f08bc95c4c9f23ba71ed2b8ebb639aa7184485c71c4ca5afcd25c4",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [
+        { "name": "100font", "url": "https://www.100font.com/thread-323.htm" }
+      ],
+      "officialDownloadUrl": "https://github.com/atelier-anchor/smiley-sans/releases/download/v2.0.1/smiley-sans-v2.0.1.zip"
+    },
+    {
+      "family": "Zhi Mang Xing",
+      "displayName": "知莽行书",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/zhimangxing-regular.ttf",
+      "sha256": "644e0cae9b40f0b10ab729a01bd32032e3973bac22be3dccae01bf6ae7fde969",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Zhi+Mang+Xing" }],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/zhimangxing/ZhiMangXing-Regular.ttf"
+    },
+    {
+      "family": "Liu Jian Mao Cao",
+      "displayName": "刘建毛草",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/liujianmaocao-regular.ttf",
+      "sha256": "cab396b91a5b7c0b4005a35891180d06e6751f5ac261fe680aec65c1ae209033",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Liu+Jian+Mao+Cao" }],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/liujianmaocao/LiuJianMaoCao-Regular.ttf"
+    },
+    {
+      "family": "ZCOOL QingKe HuangYou",
+      "displayName": "站酷庆科黄油体",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/zcool-qingke-huangyou-regular.ttf",
+      "sha256": "54f0c0df4308cd74cd0f2fd3494ae054dbc4a1fd6fa7d71f4807eb4cdd8b4136",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/ZCOOL+QingKe+HuangYou" }],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/zcoolqingkehuangyou/ZCOOLQingKeHuangYou-Regular.ttf"
+    },
+    {
+      "family": "DotGothic16",
+      "displayName": "DotGothic16",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/dotgothic16-regular.ttf",
+      "sha256": "3ad9af88726d42b40f7f365f0dcac785af73cf20ea6f1d5b44e57cc21150b8f1",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "100font", "url": "https://www.100font.com/thread-479.htm" }, { "name": "Google Fonts", "url": "https://fonts.google.com/specimen/DotGothic16" }],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/dotgothic16/DotGothic16-Regular.ttf"
+    },
+    {
+      "family": "Dela Gothic One",
+      "displayName": "Dela Gothic One",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/dela-gothic-one-regular.ttf",
+      "sha256": "4ff87a0965f1b0505e5a2c58424bc6ad3cff27e56a82f21c2fc9d6b0e3857ee2",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Dela+Gothic+One" }],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/delagothicone/DelaGothicOne-Regular.ttf"
+    },
+    {
+      "family": "Rampart One",
+      "displayName": "Rampart One",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/rampart-one-regular.ttf",
+      "sha256": "a4c60ee835175fa147eb483fac0dd8ff9007c37884ef77af86b0a868fa554d49",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Rampart+One" }],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/rampartone/RampartOne-Regular.ttf"
+    },
+    {
+      "family": "Reggae One",
+      "displayName": "Reggae One",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/reggae-one-regular.ttf",
+      "sha256": "aebe62598732d76036f30ec11bb0ec5f68938e373a06d1b4ceb6b9cf1abf3db2",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Reggae+One" }],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/reggaeone/ReggaeOne-Regular.ttf"
+    },
+    {
+      "family": "RocknRoll One",
+      "displayName": "RocknRoll One",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/rocknroll-one-regular.ttf",
+      "sha256": "dc0f5ff975851827f63f2c6bfed128ffbca14b6399a10fb5e1711215c0108526",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/RocknRoll+One" }],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/rocknrollone/RocknRollOne-Regular.ttf"
+    },
+    {
+      "family": "Zen Kurenaido",
+      "displayName": "Zen Kurenaido",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/zen-kurenaido-regular.ttf",
+      "sha256": "58b8d930d9fc10c8a5810c085bae378dacb98d0779073ee6d53d919f19ee6a4f",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Zen+Kurenaido" }],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/zenkurenaido/ZenKurenaido-Regular.ttf"
+    },
+    {
+      "family": "Kaisei Decol",
+      "displayName": "Kaisei Decol",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/kaisei-decol-regular.ttf",
+      "sha256": "38b9a9cde68c1b3300439aeea3691a35123bd1b99f9839e926fd2ad9e6b22a5c",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Kaisei+Decol" }],
+      "officialDownloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/kaiseidecol/KaiseiDecol-Regular.ttf"
+    },
+    {
+      "family": "Bungee Shade",
+      "displayName": "Bungee Shade",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/bungee-shade-regular.ttf",
+      "sha256": "34a7436fcd04a99236cdf813a16363ff359cda8e248427adcbf61fc7a6461d4a",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Bungee+Shade" }],
+      "officialDownloadUrl": "https://fonts.gstatic.com/s/bungeeshade/v17/DtVkJxarWL0t2KdzK3oI_jks7g.ttf"
+    },
+    {
+      "family": "Fascinate",
+      "displayName": "Fascinate",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/fascinate-regular.ttf",
+      "sha256": "34ba8c1eab5ba4db623527434fdcf2ce8fc2943d40f3d3a850608daa9b56be52",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Fascinate" }],
+      "officialDownloadUrl": "https://fonts.gstatic.com/s/fascinate/v23/z7NWdRrufC8XJK0IIEli1A.ttf"
+    },
+    {
+      "family": "Rubik Glitch",
+      "displayName": "Rubik Glitch",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/rubik-glitch-regular.ttf",
+      "sha256": "b89ee9ff618965971fe59abcf0798b887ed870944044eda7dc2ea02269bc98e2",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Rubik+Glitch" }],
+      "officialDownloadUrl": "https://fonts.gstatic.com/s/rubikglitch/v2/qkBSXv8b_srFRYQVYrDKh9ZvmA.ttf"
+    },
+    {
+      "family": "Monoton",
+      "displayName": "Monoton",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/monoton-regular.ttf",
+      "sha256": "c7ace162e95aa75817aad0963d23009190cd0a3a7cf80bf376d4de8f5200b376",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Monoton" }],
+      "officialDownloadUrl": "https://fonts.gstatic.com/s/monoton/v22/5h1aiZUrOngCibe4fkY.ttf"
+    },
+    {
+      "family": "Black Ops One",
+      "displayName": "Black Ops One",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/black-ops-one-regular.ttf",
+      "sha256": "bd8a70e63df108745316c6ad277874cbe139bbb90cbcaf705810ecc089fe59f8",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Black+Ops+One" }],
+      "officialDownloadUrl": "https://fonts.gstatic.com/s/blackopsone/v21/qWcsB6-ypo7xBdr6Xshe96H3WDw.ttf"
+    },
+    {
+      "family": "Righteous",
+      "displayName": "Righteous",
+      "style": "normal",
+      "weight": 400,
+      "file": "/fonts/righteous-regular.ttf",
+      "sha256": "82e2ac84900128219615a1e3a986a1821409e727e2bdb67714b2dcfe4447b946",
+      "license": { "spdx": "OFL-1.1", "file": "/fonts/OFL-1.1.txt" },
+      "sourcePages": [{ "name": "Google Fonts", "url": "https://fonts.google.com/specimen/Righteous" }],
+      "officialDownloadUrl": "https://fonts.gstatic.com/s/righteous/v18/1cXxaUPXBpj2rGoU7C9mjw.ttf"
+    }
+  ],
+  "excluded": [
+    {
+      "name": "仅标注免费商用但无明确可再分发许可的字体",
+      "reason": "不把只能证明商业使用、但无法证明可随项目打包和再分发的字体放入前端字体库。"
+    }
+  ]
+}

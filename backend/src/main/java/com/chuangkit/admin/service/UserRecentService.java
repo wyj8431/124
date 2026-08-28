@@ -85,11 +85,15 @@ public class UserRecentService {
                 vo.setName(scene.getName());
                 vo.setIcon(scene.getIcon());
                 vo.setCoverUrl(scene.getPreviewUrl());
+                vo.setWidth(scene.getWidth());
+                vo.setHeight(scene.getHeight());
             } else if ("template".equals(record.getTargetType())) {
                 DesignTemplate template = templateMap.get(record.getTargetId());
                 if (template == null) continue;
                 vo.setName(template.getTitle());
                 vo.setCoverUrl(template.getCoverUrl());
+                vo.setWidth(template.getWidth());
+                vo.setHeight(template.getHeight());
             } else {
                 continue;
             }

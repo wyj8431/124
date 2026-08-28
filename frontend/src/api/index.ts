@@ -44,6 +44,13 @@ const api = axios.create({
   timeout: 15000,
 })
 
+let refreshPromise: Promise<string> | null = null
+
+function saveAuthTokens(token: string, refreshToken?: string) {
+  localStorage.setItem('ckt_token', token)
+  if (refreshToken) localStorage.setItem('ckt_refresh_token', refreshToken)
+}
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('ckt_token')
   if (token) {
@@ -60,7 +67,30 @@ api.interceptors.response.use(
     }
     return res
   },
-  (err) => {
+  async (err) => {
+    const original = err.config as (typeof err.config & { _retry?: boolean }) | undefined
+    const status = err.response?.status
+    const refreshToken = localStorage.getItem('ckt_refresh_token')
+    if (status === 401 && original && !original._retry && refreshToken && !String(original.url).includes('/auth/refresh')) {
+      original._retry = true
+      refreshPromise ??= axios
+        .post<ApiResult<import('@/types').AuthResponse>>('/admin/auth/refresh', { refreshToken })
+        .then((response) => {
+          const next = response.data.data
+          saveAuthTokens(next.token, next.refreshToken)
+          return next.token
+        })
+        .finally(() => { refreshPromise = null })
+      try {
+        original.headers = original.headers ?? {}
+        original.headers.Authorization = `Bearer ${await refreshPromise}`
+        return api.request(original)
+      } catch {
+        localStorage.removeItem('ckt_token')
+        localStorage.removeItem('ckt_refresh_token')
+        window.dispatchEvent(new Event('ckt-auth-expired'))
+      }
+    }
     const response = err.response?.data as Partial<ApiResult<unknown>> | undefined
     const msg = response?.message
     return Promise.reject(new ApiError(msg || err.message || '网络请求失败', response?.code || err.response?.status || 500))
@@ -150,8 +180,6 @@ export const templateApi = {
         params: { keyword, page, pageSize },
       })
       .then(unwrap),
-  getById: (id: number) =>
-    api.get<ApiResult<DesignTemplate>>(`/templates/${id}`).then(unwrap),
   recommend: (limit = 12) =>
     api
       .get<ApiResult<import('@/types').RecommendTemplate[]>>(`/templates/recommend?limit=${limit}`)
@@ -175,6 +203,8 @@ export const authApi = {
     api
       .post<ApiResult<AuthResponse>>('/auth/login', { username, password })
       .then(unwrap),
+  loginByWechat: (code: string) =>
+    api.post<ApiResult<AuthResponse>>('/auth/wechat/login', { code }).then(unwrap),
   register: (username: string, password: string, nickname?: string) =>
     api
       .post<ApiResult<AuthResponse>>('/auth/register', { username, password, nickname })
@@ -228,6 +258,8 @@ export const designApi = {
       .then(unwrap),
   create: (data: {
     templateId?: number
+    templateTitle?: string
+    templateCoverUrl?: string
     sceneId?: number
     title?: string
     width?: number
@@ -243,8 +275,20 @@ export const designApi = {
     width?: number
     height?: number
     status?: number
-  }) => api.put<ApiResult<UserDesign>>(`/designs/${id}`, data).then(unwrap),
+    shareToken?: string
+  }) => {
+    const { shareToken, ...body } = data
+    return api.put<ApiResult<UserDesign>>(`/designs/${id}`, body, { params: shareToken ? { shareToken } : undefined }).then(unwrap)
+  },
   remove: (id: number) => api.delete<ApiResult<void>>(`/designs/${id}`).then(unwrap),
+}
+
+export const designShareApi = {
+  create: (designId: number, mode: 'readonly' | 'editable', expireDays = 30) =>
+    api.post<ApiResult<import('@/types/designShare').DesignShareLink>>(`/design-shares/designs/${designId}`, { mode, expireDays }).then(unwrap),
+  resolve: (token: string) =>
+    api.get<ApiResult<import('@/types/designShare').DesignShareAccess>>(`/design-shares/${encodeURIComponent(token)}`).then(unwrap),
+  revoke: (token: string) => api.delete<ApiResult<void>>(`/design-shares/${encodeURIComponent(token)}`).then(unwrap),
 }
 
 export const usageApi = {
@@ -441,6 +485,23 @@ export const teamApi = {
       .then(unwrap),
 }
 
+export const supportTicketApi = {
+  list: () =>
+    api.get<ApiResult<import('@/types/supportTicket').SupportTicket[]>>('/support/tickets').then(unwrap),
+  create: (data: {
+    subject: string
+    content: string
+    priority: import('@/types/supportTicket').SupportTicketPriority
+  }) => api.post<ApiResult<import('@/types/supportTicket').SupportTicket>>('/support/tickets', data).then(unwrap),
+  update: (id: number, data: { status: import('@/types/supportTicket').SupportTicketStatus; reply?: string }) =>
+    api.put<ApiResult<import('@/types/supportTicket').SupportTicket>>(`/support/tickets/${id}`, data).then(unwrap),
+}
+
+export const adminRbacApi = {
+  get: () => api.get<ApiResult<import('@/pages/RbacPage').RbacCatalog>>('/admin/rbac').then(unwrap),
+  updateUser: (id: number, data: { systemRole: string; status?: number }) => api.put<ApiResult<import('@/types').UserInfo>>(`/admin/rbac/users/${id}`, data).then(unwrap),
+}
+
 export const teamIntroApi = {
   getIndex: () =>
     api.get<ApiResult<import('@/types/teamIntro').TeamIntroPageData>>('/team-intro/index').then(unwrap),
@@ -513,6 +574,22 @@ export const aiApi = {
   },
   enhancePrompt: (data: { prompt: string; mode?: string }) =>
     api.post<ApiResult<{ prompt: string }>>('/ai/enhance-prompt', data).then(unwrap),
+}
+
+export interface MattingTask {
+  id: number
+  status: number
+  sourceUrl?: string
+  outputUrl?: string
+  errorMsg?: string
+  mock?: boolean
+}
+
+export const mattingApi = {
+  createTask: (sourceUrl: string) =>
+    api.post<ApiResult<MattingTask>>('/matting/tasks', { sourceUrl }).then(unwrap),
+  getTask: (id: number) =>
+    api.get<ApiResult<MattingTask>>(`/matting/tasks/${id}`).then(unwrap),
 }
 
 export default api

@@ -49,8 +49,8 @@ npm run dev
 - [x] 设计编辑器 MVP（图层编辑、撤销重做、自动保存、PNG 导出）
 - [x] 免费用户每日创建/保存/导出额度，会员额度豁免
 - [x] 功能 Tab 切换加载不同卡片
-- [ ] AI 工具页面
-- [ ] 模板详情页
+- [x] AI 生成任务链路（登录鉴权、异步任务、状态轮询、真实 Provider 输出与失败提示）
+- [x] 模板详情页（预览、收藏、使用模板进入编辑器）
 
 ## 技术栈
 
@@ -62,6 +62,16 @@ npm run dev
 
 详细文档见 [backend/README.md](./backend/README.md) 和 [frontend/README.md](./frontend/README.md)。
 
+## MySQL MCP
+
+项目包含独立的只读优先 MySQL MCP 服务，可让支持 MCP 的 AI 客户端通过授权数据库账号查询或在显式开启后执行写操作。服务位于 [mcp/mysql-server](./mcp/mysql-server)，配置、最小权限授权 SQL 和客户端接入示例见 [mcp/mysql-server/README.md](./mcp/mysql-server/README.md)。
+
 ## 开发 Skills
 
-开发进度、每日开发日报模板和可复用提示词见 [DEVELOPMENT_SKILLS.md](./DEVELOPMENT_SKILLS.md)。
+开发进度、每日开发日报模板和可复用提示词见 [DEVELOPMENT_SKILLS.md](./DEVELOPMENT_SKILLS.md)。项目内的日报 Skill 位于 `.codex/skills/daily-report-summary`。
+
+代码审查规则见 [cursor-skills/code-review/SKILL.md](./cursor-skills/code-review/SKILL.md)，Codex 会在代码变更完成前隐式调用项目 Skill。也可在项目根目录手动运行 `node scripts/codex-code-review.mjs --scope changed-files --format json`；项目内示例页为 `/tools/code-review`。
+
+代码编辑后的自动审查由编辑器 Hook 和 Git Hook 共同保障：`.cursor/hooks.json` 与 `.trae/hooks.json` 在 `afterFileEdit` 时调用 `scripts/codex-code-review-hook.mjs`，非代码文件会跳过；首次使用 Git 兜底时在 `frontend` 目录运行 `npm run hooks:install`，它会启用 `.githooks/pre-commit`（high/medium 问题阻断提交）、`.githooks/pre-push`（推送前运行完整质量门禁）和 `.githooks/post-commit`（提交后复核）。`pre-push` 默认以 `origin/main` 为审查基线，也可通过 `GATE_REVIEW_BASE` 指定其他基线。
+
+使用方式：在项目根目录打开 Codex，输入 `使用 $daily-report-summary 总结今天的开发日报`。Skill 会读取当天 Git 证据和已验证记录；如需指定日期，可先运行 `& .codex\skills\daily-report-summary\scripts\collect_daily_evidence.ps1 -ProjectRoot . -Date '2026-08-25'`，再调用 Skill。

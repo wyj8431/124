@@ -7,6 +7,7 @@ const collaborationServiceSource = await readFile(new URL('../../backend/src/mai
 const frontendMessageTypes = await readFile(new URL('../src/types/messageCenter.ts', import.meta.url), 'utf8')
 const notificationBellSource = await readFile(new URL('../src/components/common/NotificationBell.tsx', import.meta.url), 'utf8')
 const messageHookSource = await readFile(new URL('../src/hooks/useMessageCenter.ts', import.meta.url), 'utf8')
+const homeTopBarSource = await readFile(new URL('../src/components/layout/HomeTopBar.tsx', import.meta.url), 'utf8')
 
 test('message center exposes a collaboration category', () => {
   assert.match(messageServiceSource, /"collaboration"\s*,\s*"协作通知"/)
@@ -32,4 +33,5 @@ test('top-level notification bell exposes unread count and refreshes it', () => 
   assert.match(notificationBellSource, /notification-bell__badge/)
   assert.match(notificationBellSource, /99\+/)
   assert.match(messageHookSource, /refetchInterval:\s*enabled \? 30_000 : false/)
+  assert.match(homeTopBarSource, /NotificationBell/)
 })

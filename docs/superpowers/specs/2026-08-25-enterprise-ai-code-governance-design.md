@@ -58,17 +58,21 @@
 `scripts/quality-gate.ps1` 提供唯一的本地入口，按顺序执行：
 
 1. `git diff --check`
-2. 前端 `npm ci --ignore-scripts`
-3. 前端 `npm run lint`
-4. 前端 `npm run test`
-5. 前端 `npm run build`
-6. 后端 `mvnw.cmd -q test`，使用 Java 21
+2. `node scripts/codex-code-review.mjs --scope changed-files --format json`
+3. Node、pnpm 和 Java 21 运行时预检
+4. 前端 `npm ci --ignore-scripts`
+5. 前端 `npm run lint`
+6. 前端 `npm run test`
+7. 前端 `npm run build`
+8. admin-web `pnpm install --frozen-lockfile`
+9. admin-web `pnpm run build`
+10. 后端 `mvnw.cmd -q test`，使用 Java 21
 
 脚本失败时返回非零退出码，输出阶段名称和原始命令；脚本不自动修复代码、不清理用户文件、不修改数据库源文件。
 
 ### CI
 
-`.github/workflows/quality-gate.yml` 在 Push 和 Pull Request 上调用同一套检查，使用 Node 版本和 Java 21，缓存依赖但不缓存测试结果。PR 必须通过全部 job 才能合并。
+`.github/workflows/quality-gate.yml` 在 Push 和 Pull Request 上调用同一套检查，使用 Node 22、pnpm 11.3 和 Java 21，缓存依赖但不缓存测试结果。PR 必须通过全部 job 才能合并；Codex review 返回 high 级问题时门禁失败。
 
 ### High-risk policy
 

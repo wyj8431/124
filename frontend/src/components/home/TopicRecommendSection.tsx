@@ -4,10 +4,11 @@ import { ChevronRight } from '@/components/layout/LayoutParts'
 import { homeApi, templateApi } from '@/api'
 import { useAuth } from '@/context/AuthContext'
 import { RecommendTemplateCard } from './RecommendTemplateCard'
-import type { AiGenerateResult, DesignTemplate, HomeSectionCard, RecommendTemplate } from '@/types'
+import type { AiGenerateResult, DesignTemplate, HomeSection, HomeSectionCard, RecommendTemplate } from '@/types'
 
 interface Props {
   sectionCode: string
+  section?: HomeSection
   onUseTemplate?: (t: DesignTemplate) => void
   onReferenceResult?: (result: AiGenerateResult) => void
 }
@@ -30,7 +31,12 @@ function toRecommendTemplate(card: HomeSectionCard): RecommendTemplate {
   }
 }
 
-export function TopicRecommendSection({ sectionCode, onUseTemplate, onReferenceResult }: Props) {
+export function TopicRecommendSection({
+  sectionCode,
+  section: suppliedSection,
+  onUseTemplate,
+  onReferenceResult,
+}: Props) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const { isLoggedIn, setShowLoginModal } = useAuth()
   const [generatingId, setGeneratingId] = useState<number | null>(null)
@@ -38,11 +44,13 @@ export function TopicRecommendSection({ sectionCode, onUseTemplate, onReferenceR
     Record<number, { liked: boolean; likeCount: number }>
   >({})
 
-  const { data: section, isLoading } = useQuery({
+  const { data: fetchedSection, isLoading } = useQuery({
     queryKey: ['homeSection', sectionCode],
     queryFn: () => homeApi.getSection(sectionCode),
     staleTime: 60_000,
+    enabled: !suppliedSection,
   })
+  const section = suppliedSection ?? fetchedSection
 
   const handleLike = useCallback(
     async (t: RecommendTemplate) => {
@@ -91,7 +99,7 @@ export function TopicRecommendSection({ sectionCode, onUseTemplate, onReferenceR
     scrollRef.current?.scrollBy({ left: 360, behavior: 'smooth' })
   }
 
-  if (isLoading) {
+  if (!suppliedSection && isLoading) {
     return (
       <section className="topic-section mb-10">
         <div className="topic-section__inner animate-pulse">
@@ -107,6 +115,8 @@ export function TopicRecommendSection({ sectionCode, onUseTemplate, onReferenceR
   }
 
   if (!section?.cards?.length) return null
+
+  const displayCards = section.cards
 
   return (
     <section className="topic-section mb-10">
@@ -128,7 +138,7 @@ export function TopicRecommendSection({ sectionCode, onUseTemplate, onReferenceR
 
         <div className="topic-section__scroll-wrap">
           <div ref={scrollRef} className="topic-section__scroll scrollbar-none">
-            {section.cards.map((card, index) => {
+            {displayCards.map((card, index) => {
               const template = {
                 ...toRecommendTemplate(card),
                 ...likedMap[card.templateId],
@@ -147,7 +157,7 @@ export function TopicRecommendSection({ sectionCode, onUseTemplate, onReferenceR
               )
             })}
           </div>
-          {section.cards.length > 4 && (
+          {displayCards.length > 4 && (
             <button
               type="button"
               onClick={scrollNext}

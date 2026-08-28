@@ -10,6 +10,7 @@ interface Props {
   searchTabs: SearchTab[]
   hotTags: HotTag[]
   onSearch: (keyword: string, tabCode: string) => void
+  onModeChange?: (code: string) => void
   onGenerate?: (result: AiGenerateResult) => void
 }
 
@@ -179,7 +180,7 @@ function SelectPill({
   )
 }
 
-export function HeroSearch({ searchTabs, hotTags, onSearch, onGenerate }: Props) {
+export function HeroSearch({ searchTabs, hotTags, onSearch, onModeChange, onGenerate }: Props) {
   const [activeTab, setActiveTab] = useState(searchTabs[0]?.code ?? 'template')
   const [prompt, setPrompt] = useState('')
   const [focused, setFocused] = useState(false)
@@ -220,6 +221,7 @@ export function HeroSearch({ searchTabs, hotTags, onSearch, onGenerate }: Props)
     setActiveTab(code)
     setPrompt('')
     setReferenceUrls([])
+    onModeChange?.(code)
   }
 
   const handleUpload = async (files: FileList | null) => {

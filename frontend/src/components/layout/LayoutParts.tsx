@@ -33,7 +33,7 @@ const navItems = [
 ]
 
 /** 对标官网 .sider：70px 图标导航 */
-export function Sidebar() {
+export function Sidebar({ hideWorkspaceToggle = false }: { hideWorkspaceToggle?: boolean }) {
   const location = useLocation()
   const { handleCreate } = useDesignActions()
   const { workspaceExpanded, toggleWorkspace } = useSidebarLayout()
@@ -45,16 +45,18 @@ export function Sidebar() {
 
   return (
     <aside className="sider fixed left-0 top-0 z-50 flex h-full w-[70px] flex-col items-center bg-white pb-2">
-      <button
-        type="button"
-        className={cn('sider-expand', workspaceExpanded && 'sider-expand--open')}
-        aria-label={workspaceExpanded ? '收起工作区' : '展开工作区'}
-        aria-expanded={workspaceExpanded}
-        title={workspaceExpanded ? '收起工作区' : '展开工作区'}
-        onClick={toggleWorkspace}
-      >
-        <PanelLeft className="h-5 w-5 text-[#505a71] transition-transform duration-200" />
-      </button>
+      {!hideWorkspaceToggle && (
+        <button
+          type="button"
+          className={cn('sider-expand', workspaceExpanded && 'sider-expand--open')}
+          aria-label={workspaceExpanded ? '收起工作区' : '展开工作区'}
+          aria-expanded={workspaceExpanded}
+          title={workspaceExpanded ? '收起工作区' : '展开工作区'}
+          onClick={toggleWorkspace}
+        >
+          <PanelLeft className="h-5 w-5 text-[#505a71] transition-transform duration-200" />
+        </button>
+      )}
 
       <nav className="sider-nav flex flex-1 flex-col items-center">
         {navItems.map((item) => {
@@ -62,9 +64,10 @@ export function Sidebar() {
             item.to === '/'
               ? location.pathname === '/'
               : item.to != null &&
-                (item.to.startsWith('/dam-page/my')
-                  ? location.pathname.startsWith('/dam-page/my')
-                  : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`))
+                ((item.label === '模板' && location.pathname.startsWith('/designtools/designindex'))
+                  || (item.to.startsWith('/dam-page/my')
+                    ? location.pathname.startsWith('/dam-page/my')
+                    : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)))
 
           const className = cn('nav-item', active && 'nav-item--active')
 
@@ -130,9 +133,9 @@ export function TopHeader() {
   )
 }
 
-export function LoginBanner() {
+export function LoginBanner({ hidden = false }: { hidden?: boolean }) {
   const { isLoggedIn, setShowLoginModal } = useAuth()
-  if (isLoggedIn) return null
+  if (isLoggedIn || hidden) return null
 
   const benefits = [
     '100万+模板每日更新',

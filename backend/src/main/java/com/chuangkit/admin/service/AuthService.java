@@ -11,6 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -29,8 +33,7 @@ public class AuthService {
         if (user.getStatus() != null && user.getStatus() == 0) {
             throw new BusinessException("账号已被禁用");
         }
-        String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername());
-        return new AuthDto.AuthResponse(token, AuthDto.UserInfo.from(user));
+        return issueTokens(user);
     }
 
     public AuthDto.AuthResponse register(AuthDto.RegisterRequest req) {
@@ -54,8 +57,7 @@ public class AuthService {
         user.setMemberLevel(0);
         user.setStatus(1);
         userMapper.insert(user);
-        String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername());
-        return new AuthDto.AuthResponse(token, AuthDto.UserInfo.from(user));
+        return issueTokens(user);
     }
 
     public AuthDto.UserInfo getProfile(Long userId) {
@@ -105,8 +107,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         userMapper.updateById(user);
 
-        String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername());
-        return new AuthDto.AuthResponse(token, AuthDto.UserInfo.from(user));
+        return issueTokens(user);
     }
 
     private AuthDto.SmsSendResponse doSendSms(String phone) {
@@ -143,8 +144,57 @@ public class AuthService {
         user.setMemberLevel(0);
         user.setStatus(1);
         userMapper.insert(user);
-        String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername());
-        return new AuthDto.AuthResponse(token, AuthDto.UserInfo.from(user));
+        return issueTokens(user);
+    }
+
+    public AuthDto.AuthResponse refresh(String refreshToken) {
+        if (!jwtTokenProvider.validateToken(refreshToken) || !jwtTokenProvider.isRefreshToken(refreshToken)) {
+            throw new BusinessException(401, "登录已过期，请重新登录");
+        }
+        SysUser user = userMapper.selectById(jwtTokenProvider.getUserId(refreshToken));
+        if (user == null || (user.getStatus() != null && user.getStatus() == 0)) {
+            throw new BusinessException(401, "登录已过期，请重新登录");
+        }
+        return issueTokens(user);
+    }
+
+    /** 工单号：网站学院-All poster低代码开发平台-登录RBAC任务。演示环境用扫码 code 稳定映射微信用户。 */
+    public AuthDto.AuthResponse loginByWechat(String code) {
+        String normalizedCode = code == null ? "" : code.trim();
+        if (normalizedCode.isEmpty()) throw new BusinessException("微信登录凭证不能为空");
+        String username = "wx_" + shortHash(normalizedCode);
+        SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, username));
+        if (user == null) {
+            user = new SysUser();
+            user.setUsername(username);
+            user.setNickname("微信用户" + username.substring(username.length() - 4));
+            user.setPassword(passwordEncoder.encode(java.util.UUID.randomUUID().toString()));
+            user.setSystemRole("user");
+            user.setMemberLevel(0);
+            user.setStatus(1);
+            userMapper.insert(user);
+        }
+        if (user.getStatus() != null && user.getStatus() == 0) throw new BusinessException("账号已被禁用");
+        return issueTokens(user);
+    }
+
+    private AuthDto.AuthResponse issueTokens(SysUser user) {
+        return new AuthDto.AuthResponse(
+            jwtTokenProvider.generateAccessToken(user.getId(), user.getUsername()),
+            jwtTokenProvider.generateRefreshToken(user.getId(), user.getUsername()),
+            AuthDto.UserInfo.from(user)
+        );
+    }
+
+    private String shortHash(String value) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
+            StringBuilder result = new StringBuilder();
+            for (int index = 0; index < 6; index += 1) result.append(String.format("%02x", digest[index]));
+            return result.toString();
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("无法初始化微信登录凭证", exception);
+        }
     }
 
     private SysUser findUserByLoginId(String loginId) {

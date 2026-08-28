@@ -1,0 +1,7 @@
+interface:
+  display_name: "今日开发日报"
+  short_description: "基于项目变更与验证证据生成结构化中文今日开发日报摘要"
+  default_prompt: "使用 $daily-report-summary 汇总今天项目中已验证的开发工作，输出中文日报。"
+
+policy:
+  allow_implicit_invocation: true

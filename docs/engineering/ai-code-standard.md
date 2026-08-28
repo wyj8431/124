@@ -13,7 +13,8 @@ This standard applies to Codex, Claude Code, Cursor, Trae, and human contributor
 5. Implement the smallest compatible change.
 6. Review the diff for scope, security, API/data compatibility, and generated files.
 7. Run `pwsh -File scripts/quality-gate.ps1` and record the real output.
-8. Complete the delivery record and obtain human review for high-risk changes.
+8. Run `node scripts/codex-code-review.mjs --scope changed-files --format json`; resolve high- and medium-severity findings before completion.
+9. Complete the delivery record and obtain human review for high-risk changes.
 
 ## Expedited Emergency Fixes
 
@@ -54,7 +55,7 @@ Treat changes to `backend/**/security/**`, `backend/**/config/**`, `backend/**/c
 
 ## Quality Gates
 
-The only local entry point is `scripts/quality-gate.ps1`. It runs eight required stages in order: `git diff --check`; React frontend dependency installation, lint, Node tests, and build; Vue `admin-web` dependency installation and build; and Java 21 Maven tests. `admin-web` currently has no lint or test command. Adding either requires adding it to the shared gate and CI before deployment. Any failure returns a non-zero exit code and retains the original command output. The script never auto-fixes code, deletes user files, or modifies database source files.
+The only local entry point is `scripts/quality-gate.ps1`. It runs eight required stages in order: `git diff --check`; React frontend dependency installation, lint, Node tests, and build; Vue `admin-web` dependency installation and build; and Java 21 Maven tests. The gate also runs the Codex changed-file review at the `medium` threshold and fails on medium or high findings. `admin-web` currently has no lint or test command. Adding either requires adding it to the shared gate and CI before deployment. Any failure returns a non-zero exit code and retains the original command output. The script never auto-fixes code, deletes user files, or modifies database source files.
 
 GitHub Actions invokes the same script on pushes and pull requests. Pull requests that touch high-risk paths must also satisfy the evidence check and receive human approval.
 

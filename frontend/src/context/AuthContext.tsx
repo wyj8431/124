@@ -7,6 +7,7 @@ interface AuthContextValue {
   token: string | null
   isLoggedIn: boolean
   login: (username: string, password: string) => Promise<void>
+  loginByWechat: (code: string) => Promise<void>
   register: (username: string, password: string) => Promise<void>
   registerByPhone: (data: {
     phone: string
@@ -38,17 +39,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u)
   }, [])
 
+  const persistResponse = useCallback((res: { token: string; refreshToken?: string; user: UserInfo }) => {
+    if (res.refreshToken) localStorage.setItem('ckt_refresh_token', res.refreshToken)
+    persist(res.token, res.user)
+  }, [persist])
+
   const login = useCallback(async (username: string, password: string) => {
     const res = await authApi.login(username, password)
-    persist(res.token, res.user)
+    persistResponse(res)
     setShowLoginModal(false)
-  }, [persist])
+  }, [persistResponse])
+
+  const loginByWechat = useCallback(async (code: string) => {
+    const res = await authApi.loginByWechat(code)
+    persistResponse(res)
+    setShowLoginModal(false)
+  }, [persistResponse])
 
   const register = useCallback(async (username: string, password: string) => {
     const res = await authApi.register(username, password)
-    persist(res.token, res.user)
+    persistResponse(res)
     setShowLoginModal(false)
-  }, [persist])
+  }, [persistResponse])
 
   const registerByPhone = useCallback(async (data: {
     phone: string
@@ -57,9 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     confirmPassword: string
   }) => {
     const res = await authApi.registerByPhone(data)
-    persist(res.token, res.user)
+    persistResponse(res)
     setShowLoginModal(false)
-  }, [persist])
+  }, [persistResponse])
 
   const resetPassword = useCallback(async (data: {
     phone: string
@@ -68,12 +80,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     confirmPassword: string
   }) => {
     const res = await authApi.resetPassword(data)
-    persist(res.token, res.user)
+    persistResponse(res)
     setShowLoginModal(false)
-  }, [persist])
+  }, [persistResponse])
 
   const logout = useCallback(() => {
     localStorage.removeItem('ckt_token')
+    localStorage.removeItem('ckt_refresh_token')
     setToken(null)
     setUser(null)
   }, [])
@@ -84,6 +97,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [token, user, logout])
 
+  useEffect(() => {
+    const handleExpired = () => logout()
+    window.addEventListener('ckt-auth-expired', handleExpired)
+    return () => window.removeEventListener('ckt-auth-expired', handleExpired)
+  }, [logout])
+
   return (
     <AuthContext.Provider
       value={{
@@ -91,6 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token,
         isLoggedIn: !!token && !!user,
         login,
+        loginByWechat,
         register,
         registerByPhone,
         resetPassword,

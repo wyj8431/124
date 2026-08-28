@@ -50,12 +50,24 @@ public class AuthDto {
     @Data
     public static class AuthResponse {
         private String token;
+        private String refreshToken;
         private UserInfo user;
 
-        public AuthResponse(String token, UserInfo user) {
+        public AuthResponse(String token, String refreshToken, UserInfo user) {
             this.token = token;
+            this.refreshToken = refreshToken;
             this.user = user;
         }
+    }
+
+    @Data
+    public static class RefreshTokenRequest {
+        @NotBlank private String refreshToken;
+    }
+
+    @Data
+    public static class WechatLoginRequest {
+        @NotBlank private String code;
     }
 
     @Data
@@ -67,6 +79,7 @@ public class AuthDto {
         private Integer memberLevel;
         private String memberLevelName;
         private String systemRole;
+        private java.util.List<String> permissions;
 
         public static UserInfo from(com.chuangkit.admin.entity.SysUser u) {
             UserInfo info = new UserInfo();
@@ -76,6 +89,11 @@ public class AuthDto {
             info.avatar = u.getAvatar();
             info.memberLevel = u.getMemberLevel();
             info.systemRole = u.getSystemRole() == null ? "user" : u.getSystemRole();
+            info.permissions = switch (info.systemRole) {
+                case "admin" -> java.util.List.of("design:read", "design:create", "design:edit", "ai:matting", "rbac:manage", "support:manage");
+                case "user" -> java.util.List.of("design:read", "design:create", "design:edit", "workspace:read", "support:create");
+                default -> java.util.List.of("design:read", "workspace:read", "support:create");
+            };
             info.memberLevelName = switch (u.getMemberLevel() != null ? u.getMemberLevel() : 0) {
                 case 1 -> "VIP会员";
                 case 2 -> "团队版";

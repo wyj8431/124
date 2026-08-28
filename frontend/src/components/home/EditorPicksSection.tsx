@@ -6,6 +6,7 @@ import type { EditorCollection } from '@/types'
 import { coverFallback, featureCover } from '@/utils'
 
 interface Props {
+  collections?: EditorCollection[]
   onSelect?: (collection: EditorCollection) => void
 }
 
@@ -76,14 +77,16 @@ function PreviewStack({
   )
 }
 
-export function EditorPicksSection({ onSelect }: Props) {
-  const { data: collections = [], isLoading } = useQuery({
+export function EditorPicksSection({ collections: suppliedCollections, onSelect }: Props) {
+  const { data: fetchedCollections = [], isLoading } = useQuery({
     queryKey: ['editorCollections'],
     queryFn: collectionApi.list,
     staleTime: 60_000,
+    enabled: !suppliedCollections,
   })
+  const collections = suppliedCollections ?? fetchedCollections
 
-  if (isLoading && !collections.length) {
+  if (!suppliedCollections && isLoading && !collections.length) {
     return (
       <section className="editor-picks mb-10">
         <h2 className="mb-4 text-lg font-semibold text-ckt-text">编辑精选</h2>

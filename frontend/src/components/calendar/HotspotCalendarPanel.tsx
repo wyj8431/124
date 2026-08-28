@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLiveDate } from '@/hooks/useLiveDate'
 import type { CalendarCategory, CalendarEvent, CalendarToday } from '@/types'
 import { computeTodayInfo, enrichCalendarEvents } from '@/utils/calendar'
@@ -33,17 +33,7 @@ function CategoryCheckbox({
           checked ? 'border-[#1677ff] bg-[#1677ff]' : 'border-[#c9cdd4] bg-white',
         )}
       >
-        {checked && (
-          <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 text-white" fill="none">
-            <path
-              d="M2.5 6L5 8.5L9.5 3.5"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
+        {checked && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
       </span>
       <span className="text-[13px] leading-none text-[#646a73]">{label}</span>
     </label>
@@ -98,13 +88,13 @@ export function HotspotCalendarPanel({
   }
 
   return (
-    <section className="border-b border-[#eef0f3] bg-white pb-5 pt-6">
-      <div className="mx-auto max-w-[1200px] px-6">
+    <section className="border-b border-[#eef0f3] bg-white pb-7 pt-3 sm:pt-4">
+      <div className="px-5 sm:px-9 2xl:px-9">
         {/* 标题 + 筛选 + 今天 */}
-        <div className="mb-4 flex items-start justify-between gap-6">
+        <div className="mb-5 flex items-start justify-between gap-6">
           <div className="min-w-0 flex-1">
-            <h1 className="mb-3 text-[20px] font-semibold leading-none text-[#1f2329]">热点日历</h1>
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5">
+            <h1 className="mb-4 text-[21px] font-semibold leading-none text-[#1f2329]">热点日历</h1>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
               {categories.map((cat) => (
                 <CategoryCheckbox
                   key={cat.code}
@@ -117,7 +107,7 @@ export function HotspotCalendarPanel({
           </div>
 
           {/* 今天日期卡片 */}
-          <div className="flex shrink-0 items-center gap-3 rounded-lg border border-[#eef0f3] bg-white px-4 py-2.5">
+          <div className="hidden shrink-0 items-center gap-3 rounded-[8px] border border-[#edf0f5] bg-white px-4 py-2.5 shadow-[0_1px_3px_rgba(31,35,41,0.02)] sm:flex">
             <div className="text-[42px] font-semibold leading-none tracking-tight text-[#1f2329]">
               {today.day}
             </div>
@@ -152,9 +142,9 @@ export function HotspotCalendarPanel({
                   type="button"
                   onClick={() => onSelectEvent(ev.id)}
                   className={cn(
-                    'flex h-[72px] w-[220px] shrink-0 items-center justify-between rounded-lg border bg-white px-4 text-left transition-shadow',
+                    'flex h-[82px] w-[calc((100vw-170px)/6)] min-w-[188px] shrink-0 items-center justify-between rounded-[8px] border bg-white px-4 text-left transition-shadow',
                     selected
-                      ? 'border-[#1677ff] shadow-[0_0_0_1px_#1677ff]'
+                      ? 'border-[#4d9bff] shadow-[0_0_0_1px_#4d9bff]'
                       : 'border-[#e8eaed] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]',
                   )}
                 >
@@ -168,7 +158,7 @@ export function HotspotCalendarPanel({
                   </div>
                   <div
                     className={cn(
-                      'flex h-[54px] w-[46px] shrink-0 flex-col items-center justify-center rounded-md',
+                      'flex h-[50px] w-[46px] shrink-0 flex-col items-center justify-center rounded-md',
                       urgent ? 'bg-[#fff1f0] text-[#ff4d4f]' : 'bg-[#e6f4ff] text-[#1677ff]',
                     )}
                   >

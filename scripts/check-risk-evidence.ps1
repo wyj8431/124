@@ -39,34 +39,22 @@ function Get-ChangedPaths {
     if ($Reference -eq 'HEAD') {
         $workingTreePaths = @(& git diff --name-only HEAD)
         if ($LASTEXITCODE -ne 0) { throw "Unable to inspect working-tree changes from '$Reference'." }
-
         $cachedPaths = @(& git diff --cached --name-only)
         if ($LASTEXITCODE -ne 0) { throw "Unable to inspect staged changes from '$Reference'." }
-
         $untrackedPaths = @(& git ls-files --others --exclude-standard)
         if ($LASTEXITCODE -ne 0) { throw "Unable to inspect untracked changes from '$Reference'." }
-
         $paths = @($workingTreePaths + $cachedPaths + $untrackedPaths)
     }
     else {
         $paths = @(& git diff --name-only "$Reference...HEAD")
     }
 
-    if ($LASTEXITCODE -ne 0) {
-        throw "Unable to inspect changed files from '$Reference'."
-    }
-
-    return @(
-        $paths |
-            Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
-            ForEach-Object { $_ -replace '\\', '/' } |
-            Sort-Object -Unique
-    )
+    if ($LASTEXITCODE -ne 0) { throw "Unable to inspect changed files from '$Reference'." }
+    return @($paths | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { $_ -replace '\\', '/' } | Sort-Object -Unique)
 }
 
 function Test-MeaningfulContent {
     param([string]$Content)
-
     $visibleContent = $Content -replace '(?s)<!--.*?-->', ''
     $withoutEmptyListItems = $visibleContent -replace '(?m)^\s*[-*+]\s*(\[[ xX]\]\s*)?$', ''
     return -not [string]::IsNullOrWhiteSpace($withoutEmptyListItems)
@@ -74,7 +62,6 @@ function Test-MeaningfulContent {
 
 function Get-MissingEvidence {
     param([string]$Body)
-
     $labelPattern = '(?m)^\s*(?:#{1,6}\s+|[-*+]\s+)(?<label>[^:\r\n]+?)(?:\s*:\s*(?<inline>[^\r\n]*))?\s*$'
     $labels = [regex]::Matches($Body, $labelPattern)
     $missing = @()
@@ -83,41 +70,25 @@ function Get-MissingEvidence {
         $isSatisfied = $false
         for ($index = 0; $index -lt $labels.Count; $index++) {
             $label = $labels[$index]
-            if ($label.Groups['label'].Value -notmatch $requirement.Pattern) {
-                continue
-            }
-
+            if ($label.Groups['label'].Value -notmatch $requirement.Pattern) { continue }
             $inlineContent = $label.Groups['inline'].Value
-            if (Test-MeaningfulContent $inlineContent) {
-                $isSatisfied = $true
-                break
-            }
-
+            if (Test-MeaningfulContent $inlineContent) { $isSatisfied = $true; break }
             $contentStart = $label.Index + $label.Length
             $contentEnd = if ($index + 1 -lt $labels.Count) { $labels[$index + 1].Index } else { $Body.Length }
             $sectionContent = $Body.Substring($contentStart, $contentEnd - $contentStart)
-            if (Test-MeaningfulContent $sectionContent) {
-                $isSatisfied = $true
-                break
-            }
+            if (Test-MeaningfulContent $sectionContent) { $isSatisfied = $true; break }
         }
-
-        if (-not $isSatisfied) {
-            $missing += $requirement.Name
-        }
+        if (-not $isSatisfied) { $missing += $requirement.Name }
     }
-
     return $missing
 }
 
 try {
     $changedPaths = Get-ChangedPaths $BaseRef
-    $highRiskPaths = @(
-        $changedPaths | Where-Object {
-            $path = $_
-            $highRiskPatterns | Where-Object { $path -match $_ } | Select-Object -First 1
-        }
-    )
+    $highRiskPaths = @($changedPaths | Where-Object {
+        $path = $_
+        $highRiskPatterns | Where-Object { $path -match $_ } | Select-Object -First 1
+    })
 
     if ($highRiskPaths.Count -eq 0) {
         Write-Host 'No high-risk files changed.'
@@ -126,24 +97,17 @@ try {
 
     Write-Host 'High-risk files changed:'
     $highRiskPaths | ForEach-Object { Write-Host "- $_" }
-
     if ([string]::IsNullOrWhiteSpace($EventPath)) {
         Write-Host 'Required evidence headings:'
         $requiredEvidence | ForEach-Object { Write-Host "- $($_.Name)" }
         exit 0
     }
 
-    if (-not (Test-Path -LiteralPath $EventPath -PathType Leaf)) {
-        throw "GitHub event file was not found: $EventPath"
-    }
-
+    if (-not (Test-Path -LiteralPath $EventPath -PathType Leaf)) { throw "GitHub event file was not found: $EventPath" }
     $event = Get-Content -Raw -LiteralPath $EventPath | ConvertFrom-Json
     $body = [string]$event.pull_request.body
     $missingEvidence = Get-MissingEvidence $body
-    if ($missingEvidence.Count -gt 0) {
-        throw "Missing required high-risk evidence headings or content: $($missingEvidence -join ', ')."
-    }
-
+    if ($missingEvidence.Count -gt 0) { throw "Missing required high-risk evidence headings or content: $($missingEvidence -join ', ')." }
     Write-Output 'High-risk pull-request evidence is complete.'
 }
 catch {
