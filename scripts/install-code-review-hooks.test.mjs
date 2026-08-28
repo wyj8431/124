@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -14,8 +14,9 @@ test('installs the repository-local Git hooks path', async () => {
     execFileSync('git', ['init'], { cwd: tempRoot, stdio: 'ignore' })
     const result = installHooks(tempRoot)
 
-    assert.equal(path.resolve(result.repoRoot), path.resolve(tempRoot))
-    assert.equal(path.resolve(result.hooksPath), path.resolve(tempRoot, '.githooks'))
+    assert.equal(await realpath(result.repoRoot), await realpath(tempRoot))
+    assert.equal(await realpath(path.dirname(result.hooksPath)), await realpath(tempRoot))
+    assert.equal(path.basename(result.hooksPath), '.githooks')
     assert.equal(execFileSync('git', ['config', '--local', '--get', 'core.hooksPath'], {
       cwd: tempRoot,
       encoding: 'utf8',
