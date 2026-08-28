@@ -1,0 +1,62 @@
+<h2>公开资源同步边界</h2>
+<p class="subtitle">已选 A：只接入可公开访问且结构稳定的官网目录；编辑器运行时完全读取本地快照。</p>
+
+<div class="section">
+  <div class="mockup">
+    <div class="mockup-header">同步数据流</div>
+    <div class="mockup-body" style="display:grid;gap:12px;padding:18px">
+      <div style="display:grid;grid-template-columns:1fr 34px 1fr 34px 1fr;align-items:stretch;gap:8px">
+        <div style="border:1px solid #c7d2fe;border-radius:8px;background:#eef2ff;padding:14px">
+          <strong>官网公开目录</strong>
+          <p style="margin:7px 0 0">分类、模板、封面、公开元素</p>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;font-size:24px;color:#4f46e5">&#8594;</div>
+        <div style="border:1px solid #86efac;border-radius:8px;background:#f0fdf4;padding:14px">
+          <strong>手动 / CI 同步</strong>
+          <p style="margin:7px 0 0">校验响应、下载资源、过滤失败项</p>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;font-size:24px;color:#4f46e5">&#8594;</div>
+        <div style="border:1px solid #fdba74;border-radius:8px;background:#fff7ed;padding:14px">
+          <strong>编辑器本地目录</strong>
+          <p style="margin:7px 0 0">离线加载，失败时保留内置内容</p>
+        </div>
+      </div>
+      <p style="margin:0;color:#475569">不在运行时向官网请求，不使用账号、Cookie 或受限接口。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p class="label">面板映射</p>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+    <div style="border:1px solid #bbf7d0;border-radius:8px;padding:14px;background:#f0fdf4">
+      <h3 style="margin-top:0">公开目录优先</h3>
+      <p><strong>模板</strong>：官网分类、场景和封面。</p>
+      <p><strong>素材、图片</strong>：官网可公开发现的元素或图片；无公开目录时保留内置素材。</p>
+      <p><strong>背景、组件、画笔</strong>：仅在确认有独立公开目录且可下载时新增；否则保持本地控件。</p>
+    </div>
+    <div style="border:1px solid #dbeafe;border-radius:8px;padding:14px;background:#f8fbff">
+      <h3 style="margin-top:0">始终保持本地</h3>
+      <p><strong>添加、我的、文字</strong>：本地创作与上传。</p>
+      <p><strong>品牌、AI 工具、团队</strong>：用户、组织或工作流数据。</p>
+      <p><strong>所有不支持的官方类型</strong>：继续显示现有内容，不显示空白面板。</p>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="approve-data-map" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>确认此数据边界</h3>
+      <p>按公开目录同步，未知或受限目录自动回退到本地内容。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="revise-data-map" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>调整范围</h3>
+      <p>我会根据你的说明重新划分哪些面板同步、哪些保持本地。</p>
+    </div>
+  </div>
+</div>

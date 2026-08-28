@@ -31,7 +31,19 @@ mvn spring-boot:run
 | demo | 123456 | VIP 用户 |
 | admin | 123456 | 团队版 |
 
-生产环境请通过环境变量提供数据库和 JWT 配置：`MYSQL_USERNAME`、`MYSQL_PASSWORD`、`CHUANGKIT_JWT_SECRET`。
+生产环境请通过环境变量提供数据库、JWT 和 AI Provider 配置：`MYSQL_USERNAME`、`MYSQL_PASSWORD`、`CHUANGKIT_JWT_SECRET`、`AI_PROVIDER_ENDPOINT`、`AI_PROVIDER_API_KEY`、`AI_PROVIDER_MODEL`。
+
+### AI Provider 配置
+
+AI 生成接口会创建异步任务，只有 Provider 返回真实输出地址时才会将任务标记为成功；没有配置 Provider 或 Provider 返回错误时，任务会标记为失败并保留失败原因。开发环境不会再返回伪造的成功图片。
+
+```powershell
+$env:AI_PROVIDER_ENDPOINT = 'https://your-provider.example/v1/generate'
+$env:AI_PROVIDER_API_KEY = 'your-server-side-key'
+$env:AI_PROVIDER_MODEL = 'your-model-id'
+```
+
+Provider 接收 JSON 字段 `model`、`prompt`、`mode`、`aspectRatio`、`style`。成功响应需包含以下任一字段：`outputUrl`、`url`，或 OpenAI 图像响应格式中的 `data[0].url` / `data[0].b64_json`。密钥只允许通过服务端环境变量提供，不能写入前端代码或提交到仓库。
 
 ---
 

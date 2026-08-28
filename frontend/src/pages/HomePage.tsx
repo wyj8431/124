@@ -1,29 +1,61 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { homeApi, templateApi, designApi } from '@/api'
-import { useAuth } from '@/context/AuthContext'
+import { homeApi, templateApi } from '@/api'
 import { useDesignActions } from '@/hooks/useDesignActions'
 import { HeroSearch } from '@/components/home/HeroSearch'
 import { AiGenerateResultPanel } from '@/components/home/AiGenerateResultPanel'
 import { QuickStartPanel } from '@/components/home/QuickStartPanel'
+import { HomeRecommendRowSection } from '@/components/home/HomeRecommendRowSection'
 import { RecommendSection } from '@/components/home/RecommendSection'
 import { HotCalendarSection } from '@/components/home/HotCalendarSection'
 import { EditorPicksSection } from '@/components/home/EditorPicksSection'
 import { TopicScrollSection } from '@/components/home/TopicScrollSection'
 import { TopicRecommendSection } from '@/components/home/TopicRecommendSection'
 import { TemplateSection } from '@/components/home/TemplateSection'
-import type { AiGenerateResult, DesignTemplate, EditorCollection, HomeFeature } from '@/types'
+import { AiCreationDetailModal } from '@/components/ai-topic/AiCreationDetailModal'
+import { getChuangkitHomeFeatures } from '@/data/chuangkitHomeFeatures'
+import {
+  OFFICIAL_HOME_EDITOR_COLLECTIONS,
+  OFFICIAL_HOME_MASONRY_TABS,
+  OFFICIAL_HOME_RECOMMEND_TEMPLATES,
+  OFFICIAL_HOME_SECTIONS,
+} from '@/data/chuangkitHomeOfficial'
+import { OFFICIAL_HOME_AI_MODE_SECTIONS, type OfficialHomeAiMode } from '@/data/chuangkitHomeAiModesOfficial'
+import type {
+  AiGenerateResult,
+  DesignTemplate,
+  EditorCollection,
+  HomeFeature,
+  HomeSectionCard,
+} from '@/types'
+import type { AiTopicInspiration } from '@/types/aiTopic'
+
+type HomepageVideoSelection = {
+  card: HomeSectionCard
+  index: number
+}
+
+function toHomepageVideoInspiration(card: HomeSectionCard): AiTopicInspiration {
+  return {
+    id: card.id,
+    title: card.title,
+    coverUrl: card.coverUrl,
+    coverHoverUrl: card.videoUrl,
+    promptText: `生成${card.title}短剧带货视频`,
+  }
+}
 
 export function HomePage() {
   const navigate = useNavigate()
-  const { isLoggedIn, setShowLoginModal } = useAuth()
-  const { handleCreate, invalidateSidebar, openCreateModal } = useDesignActions()
+  const { handleCreate, handleUseTemplate, openCreateModal } = useDesignActions()
   const [activeFeatureTab, setActiveFeatureTab] = useState('hot')
   const [activeCategory, setActiveCategory] = useState('recommend')
+  const [activeHomeMode, setActiveHomeMode] = useState('template')
   const [searchResults, setSearchResults] = useState<DesignTemplate[] | null>(null)
   const [searchKeyword, setSearchKeyword] = useState('')
   const [generateResult, setGenerateResult] = useState<AiGenerateResult | null>(null)
+  const [selectedVideoCard, setSelectedVideoCard] = useState<HomepageVideoSelection | null>(null)
 
   const { data: homeData, isLoading, error } = useQuery({
     queryKey: ['homeIndex'],
@@ -54,17 +86,6 @@ export function HomePage() {
     enabled: !!homeData && !searchResults,
   })
 
-  const { data: videoTemplates } = useQuery({
-    queryKey: ['templates', 'video'],
-    queryFn: async () => {
-      const cats = await homeApi.getCategories()
-      const wechat = cats.find((c) => c.code === 'wechat')
-      const res = await templateApi.list(1, 6, wechat?.id)
-      return res.list.length ? res.list : (await templateApi.list(1, 6)).list
-    },
-    enabled: !!homeData && !searchResults,
-  })
-
   const handleSearch = useCallback(async (keyword: string, _tabCode?: string) => {
     setSearchKeyword(keyword)
     if (!keyword) {
@@ -75,23 +96,20 @@ export function HomePage() {
     setSearchResults(res.list)
   }, [])
 
+  const handleHomeModeChange = useCallback((mode: string) => {
+    setActiveHomeMode(mode)
+    setSearchKeyword('')
+    setSearchResults(null)
+  }, [])
+
   const handleTemplateClick = useCallback(
-    async (t: DesignTemplate) => {
-      if (!isLoggedIn) {
-        setShowLoginModal(true)
-        return
-      }
-      try {
-        await templateApi.use(t.id)
-        await designApi.create({ templateId: t.id, title: t.title })
-        invalidateSidebar()
-        alert(`已基于「${t.title}」创建设计`)
-      } catch {
-        alert('操作失败，请确认后端已启动')
-      }
-    },
-    [isLoggedIn, setShowLoginModal, invalidateSidebar],
+    (t: DesignTemplate) => void handleUseTemplate(t),
+    [handleUseTemplate],
   )
+
+  const handleHomepageCardClick = useCallback((card: HomeSectionCard, index: number) => {
+    setSelectedVideoCard({ card, index })
+  }, [])
 
   const handleFeatureClick = useCallback(
     (feature: HomeFeature) => {
@@ -174,8 +192,26 @@ export function HomePage() {
     )
   }
 
-  const festivalTemplates =
-    qixiTemplates?.length ? qixiTemplates : homeData.recommendTemplates.slice(0, 6)
+  const officialMarketingTemplates =
+    OFFICIAL_HOME_MASONRY_TABS.find((tab) => tab.name === '长图海报')?.templates.slice(0, 6) ?? []
+  const festivalTemplates = officialMarketingTemplates.length
+    ? officialMarketingTemplates
+    : qixiTemplates?.length
+      ? qixiTemplates
+      : homeData.recommendTemplates.slice(0, 6)
+  const officialFeatureCards = getChuangkitHomeFeatures(activeFeatureTab)
+  const isAiHomeMode = activeHomeMode !== 'template'
+  const officialAiModeSections = isAiHomeMode
+    ? OFFICIAL_HOME_AI_MODE_SECTIONS[activeHomeMode as OfficialHomeAiMode] ?? []
+    : []
+  const homepageVideoDetailContext = selectedVideoCard
+    ? {
+        sectionTitle: '短剧带货',
+        cardIndex: selectedVideoCard.index,
+        item: toHomepageVideoInspiration(selectedVideoCard.card),
+        siblings: [],
+      }
+    : null
 
   return (
     <div className="animate-fade-in bg-white pb-28">
@@ -184,6 +220,7 @@ export function HomePage() {
           searchTabs={homeData.searchTabs}
           hotTags={homeData.hotTags}
           onSearch={(kw, tab) => handleSearch(kw, tab)}
+          onModeChange={handleHomeModeChange}
           onGenerate={setGenerateResult}
         />
 
@@ -205,10 +242,10 @@ export function HomePage() {
                   : homeData.scenes.slice(0, 3)
               }
               tabs={homeData.homeTabs}
-              cards={featureCards ?? homeData.featureCards}
+              cards={officialFeatureCards.length ? officialFeatureCards : (featureCards ?? homeData.featureCards)}
               activeTab={activeFeatureTab}
               onTabChange={setActiveFeatureTab}
-              loading={featuresLoading}
+              loading={featuresLoading && !officialFeatureCards.length}
               onSceneClick={(sceneId) => {
                 const scene = (
                   homeData.quickStartScenes?.length
@@ -224,47 +261,80 @@ export function HomePage() {
               onFeatureClick={handleFeatureClick}
             />
 
-            <RecommendSection
-              categories={categories ?? []}
-              activeCategory={activeCategory}
-              onCategoryChange={setActiveCategory}
-              onUseTemplate={handleTemplateClick}
-              onReferenceResult={setGenerateResult}
-            />
+            {isAiHomeMode ? (
+              officialAiModeSections.map((section) => (
+                <TopicScrollSection
+                  key={section.code}
+                  sectionCode={section.code}
+                  section={section}
+                  onCardClick={handleHomepageCardClick}
+                />
+              ))
+            ) : (
+              <>
+                <HomeRecommendRowSection
+                  templates={
+                    OFFICIAL_HOME_RECOMMEND_TEMPLATES.length
+                      ? OFFICIAL_HOME_RECOMMEND_TEMPLATES
+                      : homeData.recommendTemplates
+                  }
+                  onUseTemplate={handleTemplateClick}
+                  onMore={() => navigate('/templates')}
+                />
 
-            <HotCalendarSection events={homeData.calendarEvents} />
+                <HotCalendarSection events={homeData.calendarEvents} />
 
-            <EditorPicksSection onSelect={handleCollectionClick} />
+                <EditorPicksSection
+                  collections={OFFICIAL_HOME_EDITOR_COLLECTIONS}
+                  onSelect={handleCollectionClick}
+                />
 
-            <TopicScrollSection sectionCode="xibao" onTemplateClick={handleTemplateClick} />
+                <TopicScrollSection
+                  sectionCode="xibao"
+                  section={OFFICIAL_HOME_SECTIONS.xibao}
+                  onTemplateClick={handleTemplateClick}
+                />
 
-            <TopicRecommendSection
-              sectionCode="zhaopin"
-              onUseTemplate={handleTemplateClick}
-              onReferenceResult={setGenerateResult}
-            />
+                <TopicRecommendSection
+                  sectionCode="zhaopin"
+                  section={OFFICIAL_HOME_SECTIONS.zhaopin}
+                  onUseTemplate={handleTemplateClick}
+                  onReferenceResult={setGenerateResult}
+                />
 
-            <TemplateSection
-              title="营销海报"
-              subtitle="海量营销海报，一键套用"
-              templates={festivalTemplates}
-              columns={6}
-              onTemplateClick={handleTemplateClick}
-            />
+                <TemplateSection
+                  title="营销海报"
+                  subtitle="海量营销海报，一键套用"
+                  templates={festivalTemplates}
+                  columns={6}
+                  onTemplateClick={handleTemplateClick}
+                />
 
-            <TemplateSection
-              title="短视频"
-              subtitle="爆款短视频封面与脚本"
-              templates={videoTemplates ?? []}
-              columns={6}
-              aspect="landscape"
-              showPlay
-              onTemplateClick={handleTemplateClick}
-            />
+                <RecommendSection
+                  categories={categories ?? []}
+                  activeCategory={activeCategory}
+                  onCategoryChange={setActiveCategory}
+                  onUseTemplate={handleTemplateClick}
+                  onReferenceResult={setGenerateResult}
+                  officialTabs={OFFICIAL_HOME_MASONRY_TABS}
+                />
+              </>
+            )}
 
           </>
         )}
       </div>
+
+      <AiCreationDetailModal
+        open={Boolean(homepageVideoDetailContext)}
+        context={homepageVideoDetailContext}
+        showControls
+        onClose={() => setSelectedVideoCard(null)}
+        onMakeSame={() => {
+          setSelectedVideoCard(null)
+          navigate('/designtools/aitopic/aishipin')
+        }}
+      />
     </div>
   )
 }

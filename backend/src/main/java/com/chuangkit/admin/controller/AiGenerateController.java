@@ -26,13 +26,13 @@ public class AiGenerateController {
     /** AI 生成：Agent / 图片 / 视频 */
     @PostMapping("/generate")
     public Result<?> generate(@RequestBody AiGenerateRequest req) {
-        Long userId = SecurityUtils.currentUserId();
-        return Result.ok(aiGenerateService.generate(userId, req));
+        return Result.ok(aiGenerateService.generate(SecurityUtils.requireUserId(), req));
     }
 
     /** 上传参考图 */
     @PostMapping("/upload")
     public Result<?> upload(@RequestParam("file") MultipartFile file) throws Exception {
+        SecurityUtils.requireUserId();
         return Result.ok(aiGenerateService.upload(file));
     }
 

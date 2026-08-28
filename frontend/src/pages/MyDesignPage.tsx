@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { MyDesignToolbar } from '@/components/my-design/MyDesignToolbar'
 import { MyDesignGrid } from '@/components/my-design/MyDesignGrid'
@@ -22,8 +22,6 @@ export function MyDesignPage() {
   const location = useLocation()
   const { isLoggedIn, setShowLoginModal } = useAuth()
   const { openCreateModal } = useCreateDesignModal()
-  const scrollRef = useRef<HTMLDivElement>(null)
-
   const mode = resolveMode(location.pathname)
 
   const [keywordInput, setKeywordInput] = useState('')
@@ -50,6 +48,8 @@ export function MyDesignPage() {
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
+    isError,
+    refetch,
   } = useMyDesignList(mode, queryParams, isLoggedIn)
 
   const {
@@ -82,14 +82,6 @@ export function MyDesignPage() {
   )
 
   const total = data?.pages[0]?.total ?? 0
-
-  const handleScroll = useCallback(() => {
-    const el = scrollRef.current
-    if (!el || !hasNextPage || isFetchingNextPage) return
-    if (el.scrollHeight - el.scrollTop - el.clientHeight < 120) {
-      fetchNextPage()
-    }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   if (!isLoggedIn) {
     return (
@@ -131,14 +123,17 @@ export function MyDesignPage() {
         />
 
         <div
-          ref={scrollRef}
           className="my-design-main__scroll hide-scrollbar"
-          onScroll={handleScroll}
         >
           {mode === 'favorite' ? (
             <MyFavoriteGrid
               items={favorites}
               loading={isLoading || indexLoading}
+              loadingMore={isFetchingNextPage}
+              hasMore={hasNextPage}
+              error={isError ? '设计列表加载失败' : undefined}
+              onRetry={() => void refetch()}
+              onNearEnd={() => void fetchNextPage()}
               onUnlike={(templateId) => unlike.mutate(templateId)}
             />
           ) : (
@@ -148,6 +143,11 @@ export function MyDesignPage() {
               folders={indexData?.folders ?? []}
               viewMode={viewMode}
               loading={isLoading || indexLoading}
+              loadingMore={isFetchingNextPage}
+              hasMore={hasNextPage}
+              error={isError ? '设计列表加载失败' : undefined}
+              onRetry={() => void refetch()}
+              onNearEnd={() => void fetchNextPage()}
               onCreate={openCreateModal}
               onRename={(id, title) => rename.mutate({ id, title })}
               onDelete={(id) => remove.mutate(id)}
@@ -156,10 +156,6 @@ export function MyDesignPage() {
               onMove={(id, folderId) => move.mutate({ id, folderId })}
             />
           )}
-
-          {isFetchingNextPage ? (
-            <div className="my-design-loading-more">加载中...</div>
-          ) : null}
         </div>
       </section>
     </div>

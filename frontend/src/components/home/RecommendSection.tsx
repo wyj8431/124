@@ -5,6 +5,7 @@ import { templateApi } from '@/api'
 import { useAuth } from '@/context/AuthContext'
 import { RecommendTemplateCard } from './RecommendTemplateCard'
 import type { AiGenerateResult, DesignTemplate, RecommendTemplate, TemplateCategory } from '@/types'
+import type { OfficialHomeMasonryTab } from '@/data/chuangkitHomeOfficial'
 
 interface Props {
   categories: TemplateCategory[]
@@ -12,6 +13,7 @@ interface Props {
   onCategoryChange: (code: string) => void
   onUseTemplate?: (t: DesignTemplate) => void
   onReferenceResult?: (result: AiGenerateResult) => void
+  officialTabs?: OfficialHomeMasonryTab[]
 }
 
 function toRecommendTemplate(t: DesignTemplate): RecommendTemplate {
@@ -28,13 +30,15 @@ export function RecommendSection({
   onCategoryChange,
   onUseTemplate,
   onReferenceResult,
+  officialTabs,
 }: Props) {
   const { isLoggedIn, setShowLoginModal } = useAuth()
   const queryClient = useQueryClient()
   const [generatingId, setGeneratingId] = useState<number | null>(null)
   const [tabsExpanded, setTabsExpanded] = useState(false)
 
-  const { data: templates, isLoading } = useQuery({
+  const useOfficialData = Boolean(officialTabs?.length)
+  const { data: fetchedTemplates, isLoading } = useQuery({
     queryKey: ['recommendMasonry', activeCategory],
     queryFn: async () => {
       if (activeCategory === 'recommend') {
@@ -45,8 +49,13 @@ export function RecommendSection({
       return res.list.map(toRecommendTemplate)
     },
     staleTime: 60_000,
-    enabled: activeCategory === 'recommend' || categories.length > 0,
+    enabled: !useOfficialData && (activeCategory === 'recommend' || categories.length > 0),
   })
+
+  const selectedOfficialTab = officialTabs?.find((tab) => tab.code === activeCategory) ?? officialTabs?.[0]
+  const templates = useOfficialData
+    ? selectedOfficialTab?.templates.map(toRecommendTemplate) ?? []
+    : fetchedTemplates
 
   const updateTemplate = useCallback(
     (id: number, patch: Partial<RecommendTemplate>) => {
@@ -97,9 +106,17 @@ export function RecommendSection({
     [onUseTemplate],
   )
 
-  const filterTabs = categories
-    .filter((c) => c.code !== 'recommend')
-    .sort((a, b) => a.sortOrder - b.sortOrder)
+  const filterTabs = useOfficialData
+    ? (officialTabs ?? []).slice(1).map((tab, index) => ({
+        id: 980_000 + index,
+        name: tab.name,
+        code: tab.code,
+        parentId: 0,
+        sortOrder: index,
+      }))
+    : categories
+        .filter((c) => c.code !== 'recommend')
+        .sort((a, b) => a.sortOrder - b.sortOrder)
 
   const visibleTabs = tabsExpanded ? filterTabs : filterTabs.slice(0, 13)
 

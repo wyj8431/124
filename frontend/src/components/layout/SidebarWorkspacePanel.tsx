@@ -160,14 +160,11 @@ export function SidebarWorkspacePanel() {
                   ))}
                 </ul>
               ) : (
-                <LoginHint onLogin={promptLogin}>
-                  <>
-                    {' '}
-                    查看最近使用过的
-                    <br />
-                    设计场景或工具
-                  </>
-                </LoginHint>
+                <div className="workspace-empty workspace-empty--plain">
+                  <p className="m-0 text-center text-xs leading-relaxed text-[#505a71]">
+                    暂无最近使用记录
+                  </p>
+                </div>
               )}
             </div>
           </section>
@@ -186,6 +183,7 @@ export function SidebarWorkspacePanel() {
             <span className="workspace-team-card__subtitle">体验多人在线协作</span>
           </span>
         </button>
+
       </div>
     </section>
   )

@@ -144,6 +144,7 @@ export interface HomeSectionCard {
   templateId: number
   title: string
   coverUrl: string
+  videoUrl?: string
   width?: number
   height?: number
   isFree?: number
@@ -184,6 +185,8 @@ export interface UserInfo {
   avatar?: string
   memberLevel: number
   memberLevelName: string
+  systemRole?: 'admin' | 'user' | 'operator' | string
+  permissions?: string[]
 }
 
 export interface AccountPanelData {
@@ -228,6 +231,7 @@ export interface AccountPanelData {
 
 export interface AuthResponse {
   token: string
+  refreshToken?: string
   user: UserInfo
 }
 
@@ -264,6 +268,8 @@ export interface RecentUsageItem {
   name: string
   icon?: string
   coverUrl?: string
+  width?: number
+  height?: number
 }
 
 export interface AiOption {
@@ -289,7 +295,7 @@ export interface AiGenerateResult {
   status: number
   mode: string
   outputType: 'image' | 'video' | 'agent'
-  outputUrl: string
+  outputUrl?: string
   previewUrl?: string
   duration?: string
   message: string

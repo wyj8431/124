@@ -233,6 +233,12 @@ public class CollaborationService {
             .orderByDesc(TeamPresence::getLastSeen)).stream().map(this::toPresence).toList();
     }
 
+    public Long requireDesignTeam(Long designId, Long userId) {
+        TeamOverviewDto team = currentTeam(userId);
+        verifyDesignAccess(team.getTeamId(), designId, userId);
+        return team.getTeamId();
+    }
+
     private void verifyDesignAccess(Long teamId, Long designId, Long userId) {
         requireMember(teamId, userId);
         UserDesign design = designMapper.selectById(designId);

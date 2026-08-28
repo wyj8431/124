@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "chuangkit-mysql": {
+      "command": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "C:\\Users\\魏宇杰\\Desktop\\666\\创客贴\\mcp\\mysql-server\\src\\local-server.mjs"
+      ]
+    }
+  }
+}

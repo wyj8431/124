@@ -416,6 +416,21 @@ INSERT INTO design_template (title, cover_url, scene_id, category_id, width, hei
 ('优秀员工表彰喜报', 'https://picsum.photos/seed/xibao-staff/400/533', 6, 3, 1080, 1920, '{"version":"1.0","layers":[]}', '喜报,员工', 4600, 1, 1, 1),
 ('国潮风企业招聘手机海报', 'https://picsum.photos/seed/zhaopin-06/400/533', 6, 4, 1080, 1920, '{"version":"1.0","layers":[]}', '招聘,国潮', 3400, 1, 1, 1);
 
+-- AI 模板：与设计模板分组独立，供模板中心的 AI 模板 Tab 使用。
+INSERT INTO design_template (title, cover_url, scene_id, category_id, width, height, canvas_json, tags, use_count, is_free, is_hot, is_recommend) VALUES
+('AI 蓝色科技产品发布海报', 'https://picsum.photos/seed/ai-tech-launch/400/711', 10, 2, 1080, 1920, '{"version":"1.0","layers":[]}', 'AI,海报,蓝色,科技,渐变,竖版,品牌', 4320, 1, 1, 1),
+('AI 小红书知识科普封面', 'https://picsum.photos/seed/ai-xhs-knowledge/400/533', 4, 5, 1242, 1660, '{"version":"1.0","layers":[]}', 'AI,小红书,教育,手绘,蓝色,竖版', 3860, 1, 1, 1),
+('AI 电商夏日促销主图', 'https://picsum.photos/seed/ai-ecommerce-summer/400/400', 11, 12, 800, 800, '{"version":"1.0","layers":[]}', 'AI,电商,促销,橙色,方形,品牌', 3610, 0, 1, 1),
+('AI 招聘人物宣传海报', 'https://picsum.photos/seed/ai-recruit/400/711', 10, 4, 1080, 1920, '{"version":"1.0","layers":[]}', 'AI,招聘,海报,蓝色,简约,竖版', 3380, 1, 1, 1),
+('AI 美食新品营销海报', 'https://picsum.photos/seed/ai-food-promo/400/711', 10, 2, 1080, 1920, '{"version":"1.0","layers":[]}', 'AI,美食,促销,橙色,竖版,活动', 3150, 0, 1, 1),
+('AI 商务汇报 PPT 封面', 'https://picsum.photos/seed/ai-business-ppt/400/225', 7, 13, 1920, 1080, '{"version":"1.0","layers":[]}', 'AI,PPT,商务,蓝色,简约,横版', 2980, 1, 1, 1),
+('AI 旅行攻略长图海报', 'https://picsum.photos/seed/ai-travel-long/400/900', 12, 8, 800, 2000, '{"version":"1.0","layers":[]}', 'AI,旅游,长图,绿色,手绘,竖版', 2740, 1, 0, 1),
+('AI 公众号活动首图', 'https://picsum.photos/seed/ai-wechat-event/400/171', 5, 6, 900, 383, '{"version":"1.0","layers":[]}', 'AI,公众号,活动,红色,横版,品牌', 2510, 0, 1, 1),
+('AI 医疗健康科普海报', 'https://picsum.photos/seed/ai-health/400/711', 10, 2, 1080, 1920, '{"version":"1.0","layers":[]}', 'AI,医疗,健康,蓝色,简约,竖版', 2360, 1, 0, 1),
+('AI 国风节日宣传海报', 'https://picsum.photos/seed/ai-chinese-festival/400/711', 10, 2, 1080, 1920, '{"version":"1.0","layers":[]}', 'AI,节日,海报,红色,国风,竖版', 2190, 0, 1, 1),
+('AI 视频带货封面', 'https://picsum.photos/seed/ai-video-commerce/400/225', 17, 6, 1280, 720, '{"version":"1.0","layers":[]}', 'AI,视频,电商,蓝色,横版,促销', 2050, 0, 1, 1),
+('AI 品牌周年庆邀请函', 'https://picsum.photos/seed/ai-brand-invite/400/711', 13, 10, 1080, 1920, '{"version":"1.0","layers":[]}', 'AI,邀请函,品牌,紫色,渐变,竖版', 1880, 1, 0, 1);
+
 INSERT INTO home_section_card (section_code, label, template_id, sort_order)
 SELECT 'xibao', '全部模板', id, 1 FROM design_template WHERE title = '红色质感销售业绩喜报宣传手机海报';
 INSERT INTO home_section_card (section_code, label, template_id, sort_order)

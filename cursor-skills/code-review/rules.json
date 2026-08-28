@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0",
+  "ticket": "网站学院-All poster低代码开发平台--Cursor或者Trae配置代码审查Skills能力工单",
+  "defaults": {
+    "severityThreshold": "info",
+    "maxFindings": 100,
+    "includeExtensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".vue", ".json", ".css"],
+    "excludeDirectories": ["node_modules", "dist", "target", ".git", "frontend/public/models"]
+  },
+  "rules": [
+    { "id": "correctness/missing-local-import", "category": "correctness", "severity": "high", "enabled": true },
+    { "id": "component/name-export", "category": "component-standards", "severity": "low", "enabled": true },
+    { "id": "types/no-explicit-any", "category": "types-and-contracts", "severity": "medium", "enabled": true },
+    { "id": "types/unsafe-cast", "category": "types-and-contracts", "severity": "medium", "enabled": true },
+    { "id": "dependency/wildcard-version", "category": "dependency-risk", "severity": "medium", "enabled": true },
+    { "id": "dependency/undeclared-import", "category": "dependency-risk", "severity": "medium", "enabled": true },
+    { "id": "performance/effect-dependencies", "category": "performance", "severity": "medium", "enabled": true },
+    { "id": "performance/console-in-production", "category": "performance", "severity": "low", "enabled": true },
+    { "id": "verification/missing-focused-test", "category": "verification", "severity": "info", "enabled": true }
+  ]
+}

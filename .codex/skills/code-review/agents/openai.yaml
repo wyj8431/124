@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex 自动代码审查"
+  short_description: "每次代码变更完成前自动审查并输出风险定位报告"
+  default_prompt: "使用 $code-review 审查当前变更集；修复 high/medium 问题后再次审查，并在交付前报告结果。"
+
+policy:
+  allow_implicit_invocation: true

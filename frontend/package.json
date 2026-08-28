@@ -8,9 +8,14 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test": "node --test test/*.test.mjs",
+    "hooks:install": "node ../scripts/install-code-review-hooks.mjs",
+    "sync:calendar": "node scripts/sync-calendar-official.mjs",
+    "sync:editor-catalog": "node scripts/sync-create-design-catalog.mjs",
+    "sync:home": "node scripts/sync-home-official.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mediapipe/selfie_segmentation": "^0.1.1675465747",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.101.4",
     "axios": "^1.19.0",

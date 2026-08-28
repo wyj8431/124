@@ -1,4 +1,4 @@
-import { X, Download, Sparkles, Film, ImageIcon } from 'lucide-react'
+import { X, Download, Sparkles, Film, ImageIcon, CircleAlert, Loader2 } from 'lucide-react'
 import type { AiGenerateResult } from '@/types'
 import { useEffect, useState } from 'react'
 import { aiApi } from '@/api'
@@ -16,6 +16,11 @@ export function AiGenerateResultPanel({ result, onClose }: Props) {
 
 function AiGenerateResultPanelBody({ result, onClose }: { result: AiGenerateResult; onClose: () => void }) {
   const [current, setCurrent] = useState(result)
+
+  useEffect(() => {
+    setCurrent(result)
+  }, [result])
+
   useEffect(() => {
     if (current.status !== 0) return
     const timer = window.setInterval(async () => {
@@ -28,13 +33,18 @@ function AiGenerateResultPanelBody({ result, onClose }: { result: AiGenerateResu
   }, [current.status, current.taskId])
 
   const isVideo = current.outputType === 'video'
+  const isPending = current.status === 0
+  const isFailed = current.status === 2
+  const hasOutput = current.status === 1 && Boolean(current.outputUrl)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
       <div className="animate-fade-in w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-ckt-border px-5 py-4">
           <div className="flex items-center gap-2">
-            {isVideo ? (
+            {isFailed ? (
+              <CircleAlert className="h-5 w-5 text-red-500" />
+            ) : isVideo ? (
               <Film className="h-5 w-5 text-teal-500" />
             ) : current.outputType === 'agent' ? (
               <Sparkles className="h-5 w-5 text-purple-500" />
@@ -42,7 +52,7 @@ function AiGenerateResultPanelBody({ result, onClose }: { result: AiGenerateResu
               <ImageIcon className="h-5 w-5 text-orange-500" />
             )}
             <div>
-              <h3 className="text-base font-semibold text-ckt-text">{current.status === 0 ? 'AI 任务处理中…' : current.message}</h3>
+              <h3 className="text-base font-semibold text-ckt-text">{isPending ? 'AI 任务处理中…' : current.message}</h3>
               {current.toolName && (
                 <p className="text-xs text-ckt-text-secondary">工具：{current.toolName}</p>
               )}
@@ -58,26 +68,43 @@ function AiGenerateResultPanelBody({ result, onClose }: { result: AiGenerateResu
         </div>
 
         <div className="p-5">
-          <div className="relative overflow-hidden rounded-xl bg-gray-50">
-            <img
-              src={current.outputUrl}
-              alt="生成结果"
-              className="w-full object-cover"
-              style={{ maxHeight: 360 }}
-            />
-            {isVideo && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-lg">
-                  <span className="ml-1 text-xl text-ckt-text">▶</span>
-                </div>
-                {result.duration && (
-                  <span className="absolute bottom-3 right-3 rounded bg-black/60 px-2 py-0.5 text-xs text-white">
-                    {result.duration}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
+          {isPending && (
+            <div className="flex min-h-56 flex-col items-center justify-center gap-3 rounded-xl bg-[#f7f9fc] text-center">
+              <Loader2 className="h-7 w-7 animate-spin text-ckt-primary" />
+              <p className="text-sm font-medium text-ckt-text">正在提交给 AI 服务</p>
+              <p className="max-w-xs text-xs leading-5 text-ckt-text-secondary">任务完成后会自动显示真实生成结果。</p>
+            </div>
+          )}
+
+          {isFailed && (
+            <div className="flex min-h-56 flex-col items-center justify-center gap-3 rounded-xl border border-red-100 bg-red-50/60 px-8 text-center">
+              <CircleAlert className="h-7 w-7 text-red-500" />
+              <p className="text-sm font-medium text-ckt-text">AI 任务未完成</p>
+              <p className="max-w-sm text-xs leading-5 text-ckt-text-secondary">{current.message || 'AI 服务暂时不可用，请检查 Provider 配置后重试。'}</p>
+            </div>
+          )}
+
+          {hasOutput && (
+            <div className="relative overflow-hidden rounded-xl bg-gray-50">
+              {isVideo ? (
+                <video
+                  src={current.outputUrl ?? ''}
+                  className="w-full bg-black"
+                  style={{ maxHeight: 360 }}
+                  controls
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <img
+                  src={current.outputUrl ?? ''}
+                  alt="生成结果"
+                  className="w-full object-cover"
+                  style={{ maxHeight: 360 }}
+                />
+              )}
+            </div>
+          )}
 
           {current.steps && current.steps.length > 0 && (
             <div className="mt-4 space-y-2">
@@ -98,20 +125,22 @@ function AiGenerateResultPanelBody({ result, onClose }: { result: AiGenerateResu
           )}
 
           <div className="mt-5 flex gap-3">
-            <a
-              href={current.outputUrl}
-              target="_blank"
-              rel="noreferrer"
-              download
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-ckt-primary py-2.5 text-sm font-medium text-white transition hover:opacity-90"
-            >
-              <Download className="h-4 w-4" />
-              {current.status === 0 ? '等待结果' : `下载${isVideo ? '封面' : '图片'}`}
-            </a>
+            {hasOutput && (
+              <a
+                href={current.outputUrl ?? ''}
+                target="_blank"
+                rel="noreferrer"
+                download
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-ckt-primary py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+              >
+                <Download className="h-4 w-4" />
+                下载{isVideo ? '结果' : '图片'}
+              </a>
+            )}
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-xl border border-ckt-border py-2.5 text-sm text-ckt-text transition hover:bg-gray-50"
+              className={`${hasOutput ? 'flex-1' : 'w-full'} rounded-xl border border-ckt-border py-2.5 text-sm text-ckt-text transition hover:bg-gray-50`}
             >
               继续创作
             </button>

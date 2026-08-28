@@ -1,0 +1,8 @@
+#!/bin/sh
+
+node scripts/codex-code-review-hook.mjs --fail-on medium
+status=$?
+if [ "$status" -ne 0 ]; then
+  echo "Code review blocked this commit. Fix high/medium findings and retry." >&2
+  exit "$status"
+fi

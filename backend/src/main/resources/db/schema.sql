@@ -435,6 +435,21 @@ CREATE TABLE IF NOT EXISTS team_presence (
 
 CREATE INDEX idx_team_presence_team ON team_presence(team_id, status);
 
+-- 海报多人协作分享链接；token 是公开访问凭证，撤销和过期均由服务端校验
+CREATE TABLE IF NOT EXISTS design_share_link (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    design_id       BIGINT NOT NULL,
+    created_by      BIGINT NOT NULL,
+    token           VARCHAR(128) NOT NULL UNIQUE,
+    mode            VARCHAR(16) NOT NULL DEFAULT 'readonly' COMMENT 'readonly/editable',
+    expire_time     DATETIME,
+    revoked         TINYINT DEFAULT 0,
+    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_design_share_link_design ON design_share_link(design_id, revoked);
+
 -- 企业/团队管理侧栏导航
 CREATE TABLE IF NOT EXISTS enterprise_nav (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -853,7 +868,7 @@ CREATE INDEX idx_design_auth_design ON design_auth_record(design_id);
 CREATE TABLE IF NOT EXISTS user_message (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id         BIGINT NOT NULL,
-    category        VARCHAR(32) DEFAULT 'system' COMMENT 'system activity order',
+    category        VARCHAR(32) DEFAULT 'system' COMMENT 'system activity order collaboration',
     title           VARCHAR(256) NOT NULL,
     summary         VARCHAR(512),
     content         CLOB,

@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -24,12 +24,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class AiGenerateService {
+
+    private static final long MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024L;
 
     private final AiTaskMapper aiTaskMapper;
     private final AiToolMapper aiToolMapper;
@@ -37,6 +38,15 @@ public class AiGenerateService {
 
     @Value("${chuangkit.upload.base-url:http://localhost:8081/uploads}")
     private String uploadBaseUrl;
+
+    @Value("${chuangkit.ai.endpoint:}")
+    private String configuredEndpoint;
+
+    @Value("${chuangkit.ai.api-key:}")
+    private String configuredApiKey;
+
+    @Value("${chuangkit.ai.model:}")
+    private String configuredModel;
 
     public Map<String, Object> getConfig(String mode) {
         Map<String, Object> config = new LinkedHashMap<>();
@@ -107,8 +117,6 @@ public class AiGenerateService {
             throw new BusinessException("请输入描述内容");
         }
         String mode = req.getMode() != null ? req.getMode() : "agent";
-        long seed = Math.abs(Objects.hash(req.getPrompt(), mode, System.currentTimeMillis()));
-
         AiTool tool = resolveTool(req, mode);
         AiTask task = new AiTask();
         task.setUserId(userId != null ? userId : 1L);
@@ -121,31 +129,9 @@ public class AiGenerateService {
         result.put("toolName", tool.getName());
         result.put("message", buildMessage(mode, req.getPrompt()));
 
-        switch (mode) {
-            case "image_gen" -> {
-                int[] size = parseAspectSize(req.getAspectRatio());
-                String url = previewSvg("图片生成中", req.getPrompt(), size[0], size[1]);
-                task.setOutputUrl(url);
-                result.put("outputType", "image");
-                result.put("outputUrl", url);
-            }
-            case "video_gen" -> {
-                String cover = previewSvg("视频任务排队中", req.getPrompt(), 720, 720);
-                task.setOutputUrl(cover);
-                result.put("outputType", "video");
-                result.put("outputUrl", cover);
-                result.put("previewUrl", cover);
-                result.put("duration", "00:15");
-            }
-            default -> {
-                int[] size = parseAspectSize(req.getAspectRatio());
-                String url = previewSvg("Agent 任务排队中", req.getPrompt(), size[0], size[1]);
-                task.setOutputUrl(url);
-                result.put("outputType", "agent");
-                result.put("outputUrl", url);
-                result.put("steps", buildAgentSteps(req));
-            }
-        }
+        result.put("outputType", outputType(mode));
+        if ("video_gen".equals(mode)) result.put("duration", "00:15");
+        if ("agent".equals(mode)) result.put("steps", buildAgentSteps(req));
 
         aiTaskMapper.insert(task);
         result.put("taskId", task.getId());
@@ -157,50 +143,71 @@ public class AiGenerateService {
     private void processAsync(AiTask task, AiGenerateRequest req) {
         Thread.startVirtualThread(() -> {
             try {
-                AiProvider provider = aiProviderMapper.selectOne(new LambdaQueryWrapper<AiProvider>()
-                    .eq(AiProvider::getEnabled, 1).orderByAsc(AiProvider::getId).last("LIMIT 1"));
-                if (provider != null && provider.getEndpoint() != null && !provider.getEndpoint().isBlank()) {
-                    String output = invokeProvider(provider, req);
-                    task.setOutputUrl(output);
+                ProviderConfig provider = resolveProvider();
+                if (provider == null) {
+                    throw new IllegalStateException("AI 服务尚未配置，请设置 AI_PROVIDER_ENDPOINT 和 AI_PROVIDER_API_KEY 后重试");
                 }
-                task.setStatus(1); task.setFinishTime(LocalDateTime.now()); task.setErrorMsg(null);
+                task.setOutputUrl(invokeProvider(provider, req));
+                task.setStatus(1);
+                task.setFinishTime(LocalDateTime.now());
+                task.setErrorMsg(null);
             } catch (Exception ex) {
-                task.setStatus(2); task.setErrorMsg(ex.getMessage() == null ? "AI Provider 调用失败" : truncate(ex.getMessage(), 500)); task.setFinishTime(LocalDateTime.now());
+                task.setStatus(2);
+                task.setErrorMsg(ex.getMessage() == null ? "AI Provider 调用失败" : truncate(ex.getMessage(), 500));
+                task.setFinishTime(LocalDateTime.now());
             }
             aiTaskMapper.updateById(task);
         });
     }
 
-    private String invokeProvider(AiProvider provider, AiGenerateRequest req) throws Exception {
-        String key = provider.getApiKeyEnv() == null ? null : System.getenv(provider.getApiKeyEnv());
-        String body = "{\"model\":\"" + json(provider.getModel()) + "\",\"prompt\":\"" + json(req.getPrompt()) + "\",\"mode\":\"" + json(req.getMode()) + "\"}";
-        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(provider.getEndpoint())).header("Content-Type", "application/json");
-        if (key != null && !key.isBlank()) builder.header("Authorization", "Bearer " + key);
+    private ProviderConfig resolveProvider() {
+        if (!configuredEndpoint.isBlank()) {
+            return new ProviderConfig(configuredEndpoint, configuredApiKey, configuredModel);
+        }
+        AiProvider provider = aiProviderMapper.selectOne(new LambdaQueryWrapper<AiProvider>()
+            .eq(AiProvider::getEnabled, 1).orderByAsc(AiProvider::getId).last("LIMIT 1"));
+        if (provider == null || provider.getEndpoint() == null || provider.getEndpoint().isBlank()) return null;
+        String key = provider.getApiKeyEnv() == null ? "" : System.getenv(provider.getApiKeyEnv());
+        return new ProviderConfig(provider.getEndpoint(), key, provider.getModel());
+    }
+
+    private String invokeProvider(ProviderConfig provider, AiGenerateRequest req) throws Exception {
+        String body = "{\"model\":\"" + json(firstNonBlank(req.getModel(), provider.model())) + "\",\"prompt\":\"" + json(req.getPrompt()) + "\",\"mode\":\"" + json(req.getMode()) + "\",\"aspectRatio\":\"" + json(req.getAspectRatio()) + "\",\"style\":\"" + json(req.getStyle()) + "\"}";
+        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(provider.endpoint())).header("Content-Type", "application/json");
+        if (provider.apiKey() != null && !provider.apiKey().isBlank()) builder.header("Authorization", "Bearer " + provider.apiKey());
         HttpResponse<String> response = HttpClient.newHttpClient().send(builder.POST(HttpRequest.BodyPublishers.ofString(body)).build(), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() / 100 != 2) throw new IOException("Provider HTTP " + response.statusCode());
-        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\\"outputUrl\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"").matcher(response.body());
-        if (!matcher.find()) throw new IOException("Provider 响应缺少 outputUrl");
-        return matcher.group(1);
+        return extractOutputUrl(response.body());
+    }
+
+    static String extractOutputUrl(String body) {
+        List<String> expressions = List.of(
+            "\\\"outputUrl\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"",
+            "\\\"url\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"",
+            "\\\"b64_json\\\"\\s*:\\s*\\\"([^\\\"]+)\\\""
+        );
+        for (String expression : expressions) {
+            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(expression).matcher(body);
+            if (matcher.find()) {
+                String value = matcher.group(1);
+                return expression.contains("b64_json") ? "data:image/png;base64," + value : value;
+            }
+        }
+        throw new IllegalArgumentException("Provider 响应缺少可用的输出地址");
     }
 
     private String json(String value) { return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\""); }
-
-    private String previewSvg(String title, String prompt, int width, int height) {
-        String text = title + " - " + truncate(prompt, 28);
-        String svg = "<svg xmlns='http://www.w3.org/2000/svg' width='" + width + "' height='" + height + "'><rect width='100%' height='100%' fill='#eef2ff'/><text x='50%' y='46%' text-anchor='middle' font-family='Arial,sans-serif' font-size='28' fill='#4338ca'>" + escapeXml(text) + "</text><text x='50%' y='56%' text-anchor='middle' font-family='Arial,sans-serif' font-size='16' fill='#64748b'>灵图工坊 AI 任务队列</text></svg>";
-        return "data:image/svg+xml;charset=UTF-8," + URLEncoder.encode(svg, StandardCharsets.UTF_8);
-    }
-
-    private String escapeXml(String value) { return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&apos;"); }
 
     public Map<String, Object> upload(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new BusinessException("请选择要上传的文件");
         }
-        String ext = Optional.ofNullable(file.getOriginalFilename())
-            .filter(n -> n.contains("."))
-            .map(n -> n.substring(n.lastIndexOf('.')))
-            .orElse(".jpg");
+        String ext = validateImageUpload(file.getOriginalFilename(), file.getContentType(), file.getSize());
+        try (var input = file.getInputStream()) {
+            if (ImageIO.read(input) == null) {
+                throw new BusinessException("文件内容不是有效图片");
+            }
+        }
         String filename = "ref-" + System.currentTimeMillis() + ext;
         Path dir = Path.of(System.getProperty("user.dir"), "uploads");
         Files.createDirectories(dir);
@@ -208,6 +215,23 @@ public class AiGenerateService {
         Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
         String url = uploadBaseUrl.replaceAll("/$", "") + "/" + filename;
         return Map.of("url", url, "filename", filename);
+    }
+
+    static String validateImageUpload(String originalFilename, String contentType, long size) {
+        if (size <= 0 || size > MAX_IMAGE_UPLOAD_BYTES) {
+            throw new BusinessException("图片大小不能超过 5MB");
+        }
+        String extension = Optional.ofNullable(originalFilename)
+            .filter(name -> name.contains("."))
+            .map(name -> name.substring(name.lastIndexOf('.')).toLowerCase(Locale.ROOT))
+            .orElse("");
+        if (!List.of(".jpg", ".jpeg", ".png", ".gif").contains(extension)) {
+            throw new BusinessException("仅支持 JPG、PNG、GIF 图片");
+        }
+        if (!List.of("image/jpeg", "image/jpg", "image/png", "image/gif").contains(contentType)) {
+            throw new BusinessException("图片类型不受支持");
+        }
+        return extension;
     }
 
     public Map<String, String> enhancePrompt(String prompt, String mode) {
@@ -301,6 +325,20 @@ public class AiGenerateService {
     private Map<String, String> option(String code, String name) {
         return Map.of("code", code, "name", name);
     }
+
+    private String outputType(String mode) {
+        return switch (mode) {
+            case "image_gen" -> "image";
+            case "video_gen" -> "video";
+            default -> "agent";
+        };
+    }
+
+    private String firstNonBlank(String first, String second) {
+        return first != null && !first.isBlank() ? first : (second == null ? "" : second);
+    }
+
+    private record ProviderConfig(String endpoint, String apiKey, String model) {}
 
     private String truncate(String s, int max) {
         if (s == null) return "";

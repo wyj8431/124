@@ -3,20 +3,44 @@ import { Heart, MoreHorizontal, Trash2 } from 'lucide-react'
 import type { MyFavoriteItem } from '@/types/myDesign'
 import { formatDesignTime } from '@/hooks/useMyDesign'
 import { coverFallback } from '@/utils'
+import { VirtualGrid } from '@/components/common/VirtualGrid'
 
 interface Props {
   items: MyFavoriteItem[]
   loading?: boolean
+  loadingMore?: boolean
+  hasMore?: boolean
+  error?: string
+  onRetry?: () => void
+  onNearEnd?: () => void
   onUnlike: (templateId: number) => void
 }
 
-export function MyFavoriteGrid({ items, loading, onUnlike }: Props) {
+export function MyFavoriteGrid({
+  items,
+  loading,
+  loadingMore,
+  hasMore,
+  error,
+  onRetry,
+  onNearEnd,
+  onUnlike,
+}: Props) {
   if (loading && !items.length) {
     return (
       <div className="my-design-grid">
         {Array.from({ length: 12 }).map((_, i) => (
           <div key={i} className="my-design-card my-design-card--skeleton" />
         ))}
+      </div>
+    )
+  }
+
+  if (error && !items.length) {
+    return (
+      <div className="virtual-list__message virtual-list__message--error" role="alert">
+        <span>{error}</span>
+        {onRetry ? <button type="button" onClick={onRetry}>重试</button> : null}
       </div>
     )
   }
@@ -32,11 +56,16 @@ export function MyFavoriteGrid({ items, loading, onUnlike }: Props) {
   }
 
   return (
-    <div className="my-design-grid">
-      {items.map((item) => (
-        <FavoriteCard key={item.id} item={item} onUnlike={onUnlike} />
-      ))}
-    </div>
+    <VirtualGrid
+      items={items}
+      getKey={(item) => item.id}
+      renderItem={(item) => <FavoriteCard item={item} onUnlike={onUnlike} />}
+      hasMore={hasMore}
+      loadingMore={loadingMore}
+      onNearEnd={onNearEnd}
+      className="my-design-virtual-grid"
+      ariaLabel="收藏模板列表"
+    />
   )
 }
 

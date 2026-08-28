@@ -1,4 +1,5 @@
-import { ChevronDown } from 'lucide-react'
+import { Check, ChevronDown } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/utils'
 import type { TemplateExtraFilter, TemplateSortOption } from '@/types/templateCenter'
 
@@ -24,8 +25,19 @@ export function TemplateCenterSortBar({
   onExtraChange,
   onBundleOnlyChange,
 }: Props) {
+  const [openCode, setOpenCode] = useState<string | null>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpenCode(null)
+    }
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [])
+
   return (
-    <div className="tc-sort-bar">
+    <div ref={rootRef} className="tc-sort-bar">
       <div className="tc-sort-bar__tabs">
         {sortOptions.map((opt) => (
           <button
@@ -45,8 +57,13 @@ export function TemplateCenterSortBar({
           const currentLabel =
             filter.options.find((o) => o.code === current)?.name ?? filter.name
           return (
-            <div key={filter.code} className="tc-extra-filter">
-              <button type="button" className="tc-extra-filter__trigger">
+            <div key={filter.code} className={cn('tc-extra-filter', openCode === filter.code && 'tc-extra-filter--open')}>
+              <button
+                type="button"
+                className="tc-extra-filter__trigger"
+                aria-expanded={openCode === filter.code}
+                onClick={() => setOpenCode((current) => current === filter.code ? null : filter.code)}
+              >
                 {filter.code === 'color' && current !== 'all' && (
                   <span
                     className="tc-extra-filter__dot"
@@ -62,12 +79,15 @@ export function TemplateCenterSortBar({
                 <span>{current === 'all' ? filter.name : currentLabel}</span>
                 <ChevronDown className="h-3.5 w-3.5" />
               </button>
-              <div className="tc-extra-filter__menu">
+              <div className="tc-extra-filter__menu" role="menu">
                 {filter.options.map((opt) => (
                   <button
                     key={opt.code}
                     type="button"
-                    onClick={() => onExtraChange(filter.code, opt.code)}
+                    onClick={() => {
+                      onExtraChange(filter.code, opt.code)
+                      setOpenCode(null)
+                    }}
                     className={cn(
                       'tc-extra-filter__option',
                       current === opt.code && 'tc-extra-filter__option--active',
@@ -79,7 +99,8 @@ export function TemplateCenterSortBar({
                         style={{ background: opt.colorHex }}
                       />
                     )}
-                    {opt.name}
+                    <span>{opt.name}</span>
+                    {current === opt.code && <Check className="ml-auto h-3.5 w-3.5" />}
                   </button>
                 ))}
               </div>

@@ -17,7 +17,7 @@
 
 ### 当前待处理项
 
-1. 设计编辑器高级能力（多选、缩放、旋转、丰富素材）以及 AI 工具完整流程和模板详情仍需要按产品验收补齐。
+1. 设计编辑器高级能力（多选、缩放、旋转、丰富素材）仍需要按产品验收补齐；AI 生成已具备 Provider 接入、异步任务与失败状态，待配置实际模型账号后完成真实产物验收。
 2. 当前免费额度按“创建/保存/导出”三个动作分别每日 1 次，会员等级大于 0 时不限；套餐级别额度尚未细分。
 3. `npm run lint` 当前有 9 条非阻断警告，主要涉及 `useMemo` 依赖和 Context 文件的 Fast Refresh 导出规则。
 4. 项目 README 中的后端地址和本机 JDK 路径需要在发布前统一校正；当前本地后端实际运行在 `8081`。
@@ -25,6 +25,8 @@
 ## 二、提交规则
 
 每项需求、修复或联调完成后，至少提交一条对应的开发 Skill 记录。记录必须写清楚：目标、实际改动、验证结果、风险或阻塞项。不要把未验证的结果写成“已完成”。
+
+提交标题使用 Conventional Commits 格式：`feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert`，可带作用域或破坏性标记，例如 `feat(editor): add snap guides`。CI 会通过 `scripts/check-commit-messages.ps1` 检查 push 和 Pull Request 中的提交标题。
 
 ## 三、可复用开发 Skills
 
@@ -175,3 +177,62 @@ Invoke-WebRequest http://localhost:8081/admin/home/index -UseBasicParsing
 ```
 
 前端默认地址为 `http://localhost:5173`，后端默认地址为 `http://localhost:8081`。若环境不同，应在日报中记录实际端口和差异原因。
+
+## 2026-08-24 AI 视频结果播放修复
+
+### 目标
+- 修复 AI 视频生成完成后，结果弹窗将 MP4 地址作为图片渲染而无法播放的问题。
+
+### 实际改动
+- `frontend/src/components/home/AiGenerateResultPanel.tsx`：根据 `outputType` 分支渲染。视频结果使用带控制条的原生 `<video>`，图片结果继续使用 `<img>`。
+- `frontend/test/ai-generate-result-panel.test.mjs`：增加回归用例，校验视频分支存在原生播放器且图片分支仍保留图片渲染。
+
+### 验证结果
+- `node --test test/ai-generate-result-panel.test.mjs`：通过，1 个测试通过。
+- `npm run build`：通过。Vite 保留现有 `__dirname` 配置和大 chunk 警告，未影响本次构建。
+
+### 风险或阻塞
+- 未连接真实 AI Provider 生成一条新视频做端到端验收；已验证当前灵感视频源返回 `206 video/mp4`，且播放器渲染分支已由构建和回归测试覆盖。
+
+## 2026-08-25 自定义今日开发日报 Skill
+
+### 目标
+- 在项目内提供可复用的 `daily-report-summary` skill，基于已验证证据生成今日开发日报，避免把未提交改动误报为完成。
+
+### 实际改动
+- `.codex/skills/daily-report-summary/SKILL.md`：定义证据优先、提交与工作区状态分离、验证结果不可臆测，以及中文日报输出结构。
+- `.codex/skills/daily-report-summary/agents/openai.yaml`：补充“今日开发日报”在 Codex skill 列表中的名称、描述和默认提示词。
+- `.codex/skills/daily-report-summary/scripts/collect_daily_evidence.ps1`：只读采集指定日期的 Git 提交、暂存区、工作区 diff 摘要和变更路径。
+
+### 验证结果
+- `python -X utf8 C:\Users\魏宇杰\.codex\skills\.system\skill-creator\scripts\quick_validate.py .codex\skills\daily-report-summary`：通过，输出 `Skill is valid!`。
+- `& .codex\skills\daily-report-summary\scripts\collect_daily_evidence.ps1 -ProjectRoot . -Date 2026-08-25`：成功输出当天证据；当前无当天 commit，工作区存在未提交改动。
+- `agents/openai.yaml`：已解析为有效 YAML，界面短描述长度符合 25-64 字符约束。
+
+### 风险或阻塞
+- 证据采集脚本无法单独判断未提交改动是否在当天完成，需要结合工作记录和实际验证命令；当前仓库有大量未提交修改，skill 会按未验证处理。
+
+## 2026-08-25 Cursor/Trae 代码审查 Skill
+
+### 目标
+- 为 All poster 低代码开发平台提供可被 Cursor/Trae 识别、可在终端执行、可输出统一 JSON/Markdown 结果的前端代码审查能力。
+
+### 实际改动
+- `cursor-skills/code-review/SKILL.md`、`rules.json`、`examples/review-report.schema.json`：定义命令触发、审查范围、规则分组、参数和输出契约。
+- `cursor-skills/code-review/scripts/review-engine.mjs`、`review-changed-files.mjs`：实现跨文件导入、类型、组件命名、依赖、性能和验证提示规则，支持 Git 变更集、未跟踪文件、路径、风险阈值、规则配置和 JSON/Markdown 输出。
+- `.cursor/skills/code-review/SKILL.md`、`.trae/skills/code-review/SKILL.md`、`.codex/skills/code-review/`：补齐不同编辑器/项目 Skill 入口。
+- `frontend/src/pages/CodeReviewPage.tsx`、`frontend/src/App.tsx`、`frontend/src/index.css`：新增 `/tools/code-review` 参数化示例面板；`examples/review-panel.html` 提供无依赖预览。
+- `cursor-skills/code-review/test/review-engine.test.mjs`：覆盖跨文件缺失导入、显式 any、性能规则、范围/风险过滤和空报告。
+
+### 验证结果
+- `node --check cursor-skills/code-review/scripts/review-engine.mjs`：通过。
+- `node --check cursor-skills/code-review/scripts/review-changed-files.mjs`：通过。
+- `node --test cursor-skills/code-review/test/review-engine.test.mjs`：通过，4 个测试通过。
+- `node cursor-skills/code-review/scripts/review-changed-files.mjs --help`：通过，命令帮助正常输出；JSON 模式可读取当前 Git 变更集，且包含未跟踪的 Skill 与示例页。
+- `npm run lint`（`frontend`）：通过，保留项目原有 8 条非阻断 React 规则警告。
+- `node --test test/*.test.mjs`（`frontend`）：通过，26 个测试通过。
+- `npm run build`（`frontend`）：通过；保留 Vite `__dirname` 和大 chunk 非阻断提示。
+
+### 风险或阻塞
+- 审查器当前为依赖零的启发式规则，不能替代 ESLint、TypeScript 或完整单元测试；`verification` 结果需要在编辑器/CI 中追加实际命令执行记录。
+- 当前仓库存在此前遗留的广泛未提交改动，审查默认会把它们纳入变更集；可用 `--paths` 限定范围。

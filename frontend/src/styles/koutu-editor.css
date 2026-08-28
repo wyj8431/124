@@ -91,6 +91,18 @@
   color: #1b2337;
 }
 
+.koutu-tools-header__icon-btn:focus-visible,
+.koutu-tools-header__action-btn:focus-visible,
+.koutu-tools-header__login-btn:focus-visible,
+.koutu-upload-button:focus-visible,
+.koutu-bottom-item:focus-visible,
+.koutu-help-icon:focus-visible,
+.koutu-task-card__footer a:focus-visible,
+.koutu-task-card__footer button:focus-visible {
+  outline: 2px solid #1677ff;
+  outline-offset: 3px;
+}
+
 .koutu-tools-header__icon-btn svg {
   width: 18px;
   height: 18px;
@@ -297,6 +309,10 @@
   opacity: 0.92;
 }
 
+.koutu-upload-button:active {
+  transform: translateY(1px);
+}
+
 .koutu-upload-button--batch {
   background: #f1f3f9;
   color: #505a71;
@@ -312,6 +328,22 @@
   font-size: 12px;
   line-height: 1.6;
   color: #8693ab;
+  text-align: center;
+}
+
+.koutu-dropzone__drag-hint {
+  margin: 8px 0 0;
+  color: #8693ab;
+  font-size: 12px;
+  text-align: center;
+}
+
+.koutu-upload-error {
+  max-width: 560px;
+  margin: 10px 0 0;
+  color: #d4380d;
+  font-size: 12px;
+  line-height: 18px;
   text-align: center;
 }
 
@@ -378,6 +410,10 @@
   border-radius: 12px;
 }
 
+.koutu-dropzone--dragging {
+  background: #faf9ff;
+}
+
 .koutu-hidden-input {
   display: none;
 }
@@ -398,6 +434,208 @@
   box-shadow: 0 4px 16px rgba(27, 35, 55, 0.12);
   color: #505a71;
   cursor: pointer;
+}
+
+.koutu-task-section {
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto 56px;
+}
+
+.koutu-task-section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.koutu-task-section__head h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #1d2129;
+}
+
+.koutu-task-section__head span {
+  font-size: 13px;
+  color: #86909c;
+}
+
+.koutu-task-section__subhead {
+  margin: 6px 0 0;
+  color: #86909c;
+  font-size: 12px;
+}
+
+.koutu-upload-progress,
+.koutu-task-card__progress {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8eaf0;
+}
+
+.koutu-upload-progress {
+  margin: -4px 0 16px;
+}
+
+.koutu-upload-progress span,
+.koutu-task-card__progress span {
+  display: block;
+  width: 38%;
+  height: 100%;
+  border-radius: inherit;
+  background: #635ff2;
+  animation: koutu-progress 1.2s ease-in-out infinite;
+}
+
+@keyframes koutu-progress {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(300%); }
+}
+
+.koutu-task-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.koutu-task-card {
+  overflow: hidden;
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(27, 35, 55, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.koutu-task-card:hover {
+  border-color: #c9c5ff;
+  box-shadow: 0 8px 24px rgba(27, 35, 55, 0.08);
+}
+
+.koutu-task-card__comparison {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: 180px;
+  background-color: #f4f5f7;
+  background-image: linear-gradient(45deg, #e8eaed 25%, transparent 25%), linear-gradient(-45deg, #e8eaed 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e8eaed 75%), linear-gradient(-45deg, transparent 75%, #e8eaed 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
+
+.koutu-task-card__comparison img {
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.koutu-task-card__pane {
+  position: relative;
+  min-width: 0;
+  padding-top: 24px;
+}
+
+.koutu-task-card__pane-label {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  z-index: 1;
+  color: #505a71;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.koutu-task-card__pane--result {
+  border-left: 1px solid rgba(229, 230, 235, 0.9);
+}
+
+.koutu-task-card__pane img {
+  display: block;
+  height: 196px;
+  background: transparent;
+}
+
+.koutu-task-card__state {
+  position: absolute;
+  inset: 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #635ff2;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.koutu-task-card__state .koutu-task-card__progress {
+  width: 70%;
+  margin-top: 4px;
+}
+
+.koutu-task-card__state--error {
+  color: #d4380d;
+}
+
+.koutu-task-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  min-height: 48px;
+  padding: 10px 12px;
+}
+
+.koutu-task-card__footer a,
+.koutu-task-card__footer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  color: #635ff2;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.koutu-task-card__footer a:hover,
+.koutu-task-card__footer button:hover {
+  background: #f3f2ff;
+}
+
+.koutu-task-card__footer p {
+  flex-basis: 100%;
+  margin: 0;
+  color: #d4380d;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.koutu-task-card__demo-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #f0efff;
+  color: #514bc5;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.koutu-task-card__empty {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #86909c;
+  font-size: 12px;
 }
 
 @media (max-width: 1280px) {
@@ -425,14 +663,31 @@
     padding: 10px 16px;
   }
 
+  .koutu-tools-header__right {
+    gap: 8px;
+  }
+
+  .koutu-tools-header__icon-btn,
+  .koutu-tools-header__action-btn--vip {
+    display: none;
+  }
+
   .koutu-tools-header__action-btn:not(.koutu-tools-header__action-btn--vip) {
     display: none;
   }
 
   .koutu-content__left {
-    width: min(400px, 100%);
+    width: min(400px, calc(100vw - 48px));
+    max-width: 100%;
+    min-width: 0;
     height: auto;
     aspect-ratio: 1;
+  }
+
+  .koutu-content__right {
+    width: min(760px, calc(100vw - 48px));
+    max-width: 100%;
+    min-width: 0;
   }
 
   .koutu-top-buttons {
@@ -448,5 +703,74 @@
   .koutu-default-bottom {
     flex-wrap: wrap;
     max-width: 320px;
+  }
+
+  .koutu-task-section {
+    width: min(100% - 32px, 560px);
+  }
+
+  .koutu-task-section__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .koutu-task-card__comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .koutu-task-card__pane--result {
+    border-top: 1px solid rgba(229, 230, 235, 0.9);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .koutu-tools-header {
+    gap: 8px;
+    padding-inline: 12px;
+  }
+
+  .koutu-tools-header__left {
+    gap: 8px;
+  }
+
+  .koutu-tools-header__home-link span,
+  .koutu-tools-header__left .koutu-tools-header__divider {
+    display: none;
+  }
+
+  .koutu-tools-header__home-link {
+    width: 28px;
+  }
+
+  .koutu-tools-header__logo {
+    font-size: 16px;
+  }
+
+  .koutu-tools-header__tool-name {
+    white-space: nowrap;
+  }
+
+  .koutu-tools-header__login-btn {
+    min-width: 84px;
+    padding-inline: 10px;
+    font-size: 13px;
+  }
+
+  .tool-upload-assembly__content {
+    padding-inline: 16px;
+  }
+
+  .koutu-content__right {
+    width: min(760px, calc(100vw - 32px));
+    padding-inline: 0;
+  }
+
+  .koutu-content__left {
+    width: min(400px, calc(100vw - 32px));
+  }
+
+  .koutu-task-section {
+    width: calc(100% - 32px);
   }
 }

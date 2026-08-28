@@ -11,13 +11,13 @@ Use sub-agents proactively only when the task has independent, bounded parts tha
 ## Before Work
 
 - Read the repository guidance and the relevant installed skills before changing code.
-- Every multi-step task, including features, refactors, documentation, and infrastructure work, must leave a design document under `docs/superpowers/specs/` and an implementation plan under `docs/superpowers/plans/` before implementation.
-- For every multi-step task, including features, refactors, documentation, and infrastructure work, follow this sequence: `superpowers:brainstorming` -> user confirmation -> `superpowers:writing-plans`.
+- For any new feature, behavior change, or bug fix, use the `superpowers` workflow: `superpowers:brainstorming`, obtain user confirmation, then `superpowers:writing-plans`.
+- Every multi-step task must leave a design document under `docs/superpowers/specs/` and an implementation plan under `docs/superpowers/plans/` before implementation.
 - Treat the approved plan and the user's latest request as the source of truth. Do not infer unrelated scope.
 
 ## Implementation Contract
 
-- Use `superpowers:test-driven-development` before implementation for behavior changes and test changes; keep the smallest useful failing test, implementation, and regression coverage.
+- Use `superpowers:test-driven-development` before implementation whenever behavior or tests change; keep the smallest useful failing test, implementation, and regression coverage.
 - Make minimal, reversible changes. Preserve existing user changes, repository conventions, public contracts, and data. Never reset or overwrite unrelated work.
 - Keep secrets, credentials, generated artifacts, and machine-local files out of commits. Use existing APIs, helpers, and dependency versions before introducing new abstractions.
 - For high-risk changes (authentication, authorization, payments, data migrations, destructive operations, security boundaries, or shared infrastructure), provide regression tests, a concise risk note, and explicit human review evidence in the delivery record.
@@ -27,6 +27,12 @@ Use sub-agents proactively only when the task has independent, bounded parts tha
 - Before completion, use `superpowers:verification-before-completion` and run the repository quality gate:
 
   `pwsh -File scripts/quality-gate.ps1`
+
+- Before claiming any code change is complete, Codex must run the project review Skill:
+
+  `node scripts/codex-code-review.mjs --scope changed-files --format json`
+
+  Read the report, fix high/medium findings, and rerun it after fixes. This is the Codex-native replacement for the old Cursor/Trae review entry points.
 
 - Report the exact commands and results, including any skipped check and why. Do not claim completion from inspection alone.
 - Every delivery must include or update the engineering standard at `docs/engineering/ai-code-standard.md` when the standard is affected, plus a delivery record describing scope, risks, tests, and review evidence.

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>详情页</title>
+    <g id="详情页" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="简历"></g>
+        <path d="M28.3642664,40.7364931 L12.611,40.7364931 C10.1052992,40.7364931 8.0740274,38.7052213 8.0740274,36.1995205 L8.0740274,11.8004795 C8.0740274,9.29477871 10.1052992,7.26350689 12.611,7.26350689 L35.389,7.26350689 C37.8947008,7.26350689 39.9259726,9.29477871 39.9259726,11.8004795 C39.9259726,15.8669863 39.9259726,18.4247195 39.9259726,22.4912263" id="路径" stroke="#3B3B3B" stroke-width="4" stroke-linecap="round" fill-rule="nonzero"></path>
+        <g id="编组-2" transform="translate(13.044868, 13.480343)" stroke="#3B3B3B" stroke-width="4">
+            <circle id="椭圆形" transform="translate(11.515006, 11.515006) rotate(-45.000000) translate(-11.515006, -11.515006) " cx="11.5150056" cy="11.5150056" r="7.86860624"></circle>
+            <line x1="17.2838993" y1="17.2838993" x2="23.9607144" y2="23.9607144" id="路径-4" stroke-linecap="round"></line>
+        </g>
+    </g>
+</svg>

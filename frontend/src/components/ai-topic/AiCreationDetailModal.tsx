@@ -24,11 +24,13 @@ export function AiCreationDetailModal({
   context,
   onClose,
   onMakeSame,
+  showControls = false,
 }: {
   open: boolean
   context: DetailContext | null
   onClose: () => void
   onMakeSame: (item: AiTopicInspiration) => void
+  showControls?: boolean
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
@@ -138,7 +140,7 @@ export function AiCreationDetailModal({
                       loop
                       playsInline
                       autoPlay
-                      controls={false}
+                      controls={showControls}
                     />
                   ) : (
                     <img src={media.poster} alt={item.title} className="detail-main-video" />

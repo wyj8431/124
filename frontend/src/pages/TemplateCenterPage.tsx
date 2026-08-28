@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useSearchParams } from 'react-router-dom'
-import { calendarApi, designApi, templateApi, templateCenterApi } from '@/api'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { ChevronRight, LayoutGrid } from 'lucide-react'
+import { calendarApi, templateCenterApi } from '@/api'
 import { HotspotCalendarPanel } from '@/components/calendar/HotspotCalendarPanel'
 import { TemplateCenterFilterRows } from '@/components/template-center/TemplateCenterFilterRows'
 import { TemplateCenterHeader } from '@/components/template-center/TemplateCenterHeader'
 import { TemplateCenterMasonry } from '@/components/template-center/TemplateCenterMasonry'
 import { TemplateCenterSortBar } from '@/components/template-center/TemplateCenterSortBar'
-import { useAuth } from '@/context/AuthContext'
+import { AiTemplateGallery } from '@/components/template-center/AiTemplateGallery'
 import { useLiveDate } from '@/hooks/useLiveDate'
+import { useDesignActions } from '@/hooks/useDesignActions'
 import type { DesignTemplate } from '@/types'
 import { enrichCalendarEvents } from '@/utils/calendar'
 import { cn } from '@/utils'
+import '@/styles/ai-template-gallery.css'
 
 export function TemplateCenterPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -20,10 +23,12 @@ export function TemplateCenterPage() {
     ? Number(searchParams.get('eventId'))
     : null
 
-  const { isLoggedIn, setShowLoginModal } = useAuth()
   const now = useLiveDate()
 
-  const [activeTab, setActiveTab] = useState('design')
+  const [activeTab, setActiveTab] = useState(() =>
+    searchParams.get('aiMode') === 'template' ? 'ai' : 'design',
+  )
+  const [activeNav, setActiveNav] = useState('center')
   const [filterValues, setFilterValues] = useState<Record<string, string>>({
     category: 'all',
     scene: 'recommend',
@@ -34,6 +39,7 @@ export function TemplateCenterPage() {
   const [bundleOnly, setBundleOnly] = useState(false)
   const [keyword, setKeyword] = useState('')
   const [searchKeyword, setSearchKeyword] = useState('')
+  const { handleUseTemplate } = useDesignActions()
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedEventId, setSelectedEventId] = useState<number | null>(initialEventId)
@@ -113,8 +119,22 @@ export function TemplateCenterPage() {
 
   const templates = templateResult?.list ?? []
 
+  const navigate = useNavigate()
+
   const handleFilterChange = useCallback((groupCode: string, optionCode: string) => {
+    setActiveNav('center')
     setFilterValues((prev) => ({ ...prev, [groupCode]: optionCode }))
+  }, [])
+
+  const handleNavChange = useCallback((code: string, linkValue?: string) => {
+    setActiveNav(code)
+    if (code === 'center') {
+      setFilterValues({ category: 'all', scene: 'recommend', industry: 'all' })
+      return
+    }
+    if (linkValue) {
+      setFilterValues((prev) => ({ ...prev, category: linkValue, scene: 'recommend' }))
+    }
   }, [])
 
   const handleSearch = useCallback(() => {
@@ -138,21 +158,18 @@ export function TemplateCenterPage() {
   }, [])
 
   const handleTemplateClick = useCallback(
-    async (t: DesignTemplate) => {
-      if (!isLoggedIn) {
-        setShowLoginModal(true)
-        return
-      }
-      try {
-        await templateApi.use(t.id)
-        await designApi.create({ templateId: t.id, title: t.title })
-        alert(`已基于「${t.title}」创建设计`)
-      } catch {
-        alert('操作失败，请确认后端已启动')
-      }
-    },
-    [isLoggedIn, setShowLoginModal],
+    (t: DesignTemplate) => void handleUseTemplate(t),
+    [handleUseTemplate],
   )
+
+  const handleTabChange = useCallback((tab: string) => {
+    setActiveTab(tab)
+    if (tab === 'ai') {
+      setSearchParams({ aiMode: 'template' }, { replace: true })
+    } else {
+      setSearchParams({}, { replace: true })
+    }
+  }, [setSearchParams])
 
   if (indexLoading) {
     return (
@@ -185,6 +202,22 @@ export function TemplateCenterPage() {
 
   const activeEvent = events.find((e) => e.id === activeEventId)
 
+  if (activeTab === 'ai') {
+    return (
+      <div className="ai-template-page min-h-screen bg-white">
+        <TemplateCenterHeader
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onSearch={handleSearch}
+        />
+        <AiTemplateGallery
+          onSelectDesignTemplates={() => handleTabChange('design')}
+          onMakeSame={() => navigate('/designtools/aitopic/AIhaibao')}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="tc-page min-h-screen bg-[#f5f7fa]">
       <TemplateCenterHeader
@@ -192,6 +225,27 @@ export function TemplateCenterPage() {
         onKeywordChange={setKeyword}
         onSearch={handleSearch}
       />
+
+      <div className="tc-nav-shell">
+        <div className="tc-nav-strip mx-auto max-w-[1400px] px-6">
+          <div className="tc-nav-strip__lead"><LayoutGrid className="h-4 w-4" /> 模板资源</div>
+          <div className="tc-nav-strip__items">
+            {indexData.navItems.slice(0, 7).map((item) => (
+              <button
+                key={item.code}
+                type="button"
+                className={cn('tc-nav-item', activeNav === item.code && 'tc-nav-item--active')}
+                onClick={() => handleNavChange(item.code, item.linkValue)}
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="tc-nav-more" onClick={() => handleNavChange('center')}>
+            更多 <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
 
       {calendarMode && calendarData && !calendarLoading && (
         <HotspotCalendarPanel
@@ -212,7 +266,7 @@ export function TemplateCenterPage() {
                   <button
                     key={tab.code}
                     type="button"
-                    onClick={() => setActiveTab(tab.code)}
+                    onClick={() => handleTabChange(tab.code)}
                     className={cn('tc-tab', activeTab === tab.code && 'tc-tab--active')}
                   >
                     {tab.name}
@@ -242,6 +296,10 @@ export function TemplateCenterPage() {
               />
 
               <div ref={templatesRef} className="mt-5 scroll-mt-[80px]">
+                <div className="tc-results-meta mb-3">
+                  <span>{searchKeyword.trim() ? `搜索“${searchKeyword.trim()}”` : '热门模板'}</span>
+                  <span className="tc-results-meta__count">共 {templateResult?.total ?? templates.length} 个模板</span>
+                </div>
                 {calendarMode && activeEvent && (
                   <p className="mb-4 text-[13px] text-[#646a73]">
                     {searchKeyword.trim()

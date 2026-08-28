@@ -16,16 +16,16 @@ export function ToolsPage() {
 
   const handleToolClick = useCallback(
     (title: string) => {
+      if (!isLoggedIn) {
+        setShowLoginModal(true)
+        return
+      }
       if (title === 'AI抠图') {
         navigate('/editor/koutu?fmodule=fuction&fpage=home')
         return
       }
       if (title === 'AI海报' || title === 'AI海报/封面') {
         navigate('/designtools/aitopic/AIhaibao')
-        return
-      }
-      if (!isLoggedIn) {
-        setShowLoginModal(true)
         return
       }
       console.info('[tools]', title)

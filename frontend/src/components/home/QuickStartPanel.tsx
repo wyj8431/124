@@ -16,10 +16,7 @@ interface Props {
 
 function CoverImage({ src, alt, seed }: { src?: string; alt: string; seed: string }) {
   const [failed, setFailed] = useState(false)
-  const resolved =
-    !failed && src && (src.startsWith('http') || src.startsWith('//'))
-      ? src
-      : coverFallback(seed, 160, 120)
+  const resolved = !failed && src ? src : coverFallback(seed, 160, 120)
 
   return (
     <img
@@ -46,7 +43,7 @@ export function QuickStartPanel({
   const createScene = quickStartScenes.find((s) => s.code === 'create') ?? quickStartScenes[0]
   const subScenes = quickStartScenes.filter((s) => s.code !== 'create').slice(0, 2)
 
-  const pageSize = 6
+  const pageSize = 8
   const totalPages = Math.max(1, Math.ceil(cards.length / pageSize))
   const visibleCards = cards.slice(page * pageSize, page * pageSize + pageSize)
 
@@ -141,7 +138,7 @@ export function QuickStartPanel({
           </div>
 
           <div className="relative">
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               {loading
                 ? Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="h-[108px] animate-pulse rounded-xl bg-white/80" />

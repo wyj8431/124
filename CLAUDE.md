@@ -12,25 +12,20 @@ Use sub-agents proactively only when the task has independent, bounded parts tha
 
 ## Before Work
 
-- Read the repository guidance and the relevant installed skills before changing code.
-- Every multi-step task, including features, refactors, documentation, and infrastructure work, must leave a design document under `docs/superpowers/specs/` and an implementation plan under `docs/superpowers/plans/` before implementation.
-- For every multi-step task, including features, refactors, documentation, and infrastructure work, follow this sequence: `superpowers:brainstorming` -> user confirmation -> `superpowers:writing-plans`.
-- Treat the approved plan and the user's latest request as the source of truth. Do not infer unrelated scope.
+- Follow this required sequence for planned changes: `superpowers:brainstorming` -> user confirmation -> `superpowers:writing-plans` -> `superpowers:test-driven-development` -> implementation -> `superpowers:verification-before-completion`.
+- Every multi-step task must leave a design document under `docs/superpowers/specs/` and an implementation plan under `docs/superpowers/plans/` before implementation.
+- Read the repository guidance and relevant installed skills before changing code. Treat the approved plan and the user's latest request as the source of truth.
 
 ## Implementation Contract
 
-- Use `superpowers:test-driven-development` before implementation for behavior changes and test changes; keep the smallest useful failing test, implementation, and regression coverage.
 - Make minimal, reversible changes. Preserve existing user changes, repository conventions, public contracts, and data. Never reset or overwrite unrelated work.
 - Keep secrets, credentials, generated artifacts, and machine-local files out of commits. Use existing APIs, helpers, and dependency versions before introducing new abstractions.
 - High-risk changes (authentication, authorization, payments, data migrations, destructive operations, security boundaries, or shared infrastructure) require regression tests, a concise risk note, and explicit human review evidence in the delivery record.
 
 ## Verification Contract
 
-- Before completion, use `superpowers:verification-before-completion` and run the repository quality gate:
-
-  `pwsh -File scripts/quality-gate.ps1`
-
-- Report the exact commands and results, including any skipped check and why. Do not claim completion from inspection alone.
+- Before completion, run `pwsh -File scripts/quality-gate.ps1` and report exact commands, results, and any justified skips.
+- Before completion of any code change, run `node scripts/codex-code-review.mjs --scope changed-files --format json`, resolve high/medium findings, and report the final review result.
 - Every delivery must include or update `docs/engineering/ai-code-standard.md` when the standard is affected, plus a delivery record covering scope, risks, tests, and review evidence.
 - `superpowers` is available in this environment. `claude-code-everything` was not found, so this repository does not claim that plugin is installed or invoked; compliance is enforced through these auditable rules and quality-gate results.
 

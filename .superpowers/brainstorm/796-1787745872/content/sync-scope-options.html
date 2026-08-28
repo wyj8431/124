@@ -1,0 +1,45 @@
+<h2>编辑器目录同步范围</h2>
+<p class="subtitle">只使用公开可访问的目录和缩略图；同步由开发脚本显式触发，编辑器运行时只读取项目内快照。</p>
+
+<div class="options">
+  <div class="option" data-choice="recommended" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>公开资源面板同步 <span class="label">推荐</span></h3>
+      <p>模板、素材、图片、背景、组件和画笔只在存在稳定公开目录时接入本地快照。</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>同步</h4><ul><li>模板 / 素材</li><li>公开图片与背景</li><li>公开组件与画笔素材</li></ul></div>
+        <div class="cons"><h4>保留本地</h4><ul><li>我的 / 品牌 / 团队</li><li>AI 工具 / 文字 / 添加</li><li>没有公开目录的类型</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="all-rail" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>所有工具入口都强行映射</h3>
+      <p>每个侧栏入口都尝试抓取官网数据，即使其实际是用户资产或功能入口。</p>
+      <div class="pros-cons"><div class="pros"><h4>优点</h4><ul><li>表面上覆盖最多入口</li></ul></div><div class="cons"><h4>风险</h4><ul><li>会混入登录态和用户数据</li><li>接口不稳定，语义不正确</li></ul></div></div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="components-only" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>只先同步组件</h3>
+      <p>只扩展截图中的组件面板，其他可公开资源面板继续保留现有本地内容。</p>
+      <div class="pros-cons"><div class="pros"><h4>优点</h4><ul><li>范围最小，交付最快</li></ul></div><div class="cons"><h4>限制</h4><ul><li>不能满足“其他面板也同步”</li></ul></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="mockup">
+    <div class="mockup-header">推荐后的数据流</div>
+    <div class="mockup-body" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;text-align:center">
+      <div class="placeholder">官网公开目录<br><small>只读勘察</small></div>
+      <div class="placeholder">显式同步脚本<br><small>校验、限流、下载</small></div>
+      <div class="placeholder">项目内快照<br><small>编辑器离线读取</small></div>
+    </div>
+  </div>
+</div>

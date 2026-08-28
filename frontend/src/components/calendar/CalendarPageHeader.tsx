@@ -20,10 +20,10 @@ export function CalendarPageHeader({ keyword, onKeywordChange, onSearch }: Props
 
   return (
     <header className="sticky top-0 z-30 border-b border-[#eef0f3] bg-white">
-      <div className="mx-auto flex h-[60px] max-w-[1200px] items-center gap-6 px-6">
+      <div className="flex h-[58px] items-center gap-6 px-5 sm:px-9">
         <Link to="/" className="flex shrink-0 items-center gap-2">
           <PlatformLogo className="h-8 w-8 shadow-sm ring-1 ring-[#ffd660]/45" />
-          <span className="text-base font-semibold text-ckt-text">灵图工坊</span>
+          <span className="text-base font-semibold text-ckt-text">创客贴</span>
         </Link>
 
         <form

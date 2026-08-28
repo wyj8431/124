@@ -11,6 +11,8 @@ import type { MyDesignFolder, MyDesignItem, MyDesignPageMode } from '@/types/myD
 import { formatDesignTime } from '@/hooks/useMyDesign'
 import { useDesignActions } from '@/hooks/useDesignActions'
 import { coverFallback, cn } from '@/utils'
+import { VirtualGrid } from '@/components/common/VirtualGrid'
+import { VirtualList } from '@/components/common/VirtualList'
 
 interface Props {
   mode: MyDesignPageMode
@@ -18,6 +20,11 @@ interface Props {
   folders: MyDesignFolder[]
   viewMode: 'grid' | 'list'
   loading?: boolean
+  loadingMore?: boolean
+  hasMore?: boolean
+  error?: string
+  onRetry?: () => void
+  onNearEnd?: () => void
   onCreate?: () => void
   onRename: (id: number, title: string) => void
   onDelete: (id: number) => void
@@ -32,6 +39,11 @@ export function MyDesignGrid({
   folders,
   viewMode,
   loading,
+  loadingMore,
+  hasMore,
+  error,
+  onRetry,
+  onNearEnd,
   onCreate,
   onRename,
   onDelete,
@@ -47,6 +59,15 @@ export function MyDesignGrid({
         {Array.from({ length: 12 }).map((_, i) => (
           <div key={i} className="my-design-card my-design-card--skeleton" />
         ))}
+      </div>
+    )
+  }
+
+  if (error && !items.length) {
+    return (
+      <div className="virtual-list__message virtual-list__message--error" role="alert">
+        <span>{error}</span>
+        {onRetry ? <button type="button" onClick={onRetry}>重试</button> : null}
       </div>
     )
   }
@@ -78,24 +99,49 @@ export function MyDesignGrid({
     )
   }
 
+  const renderItem = (item: MyDesignItem) => (
+    <DesignCard
+      item={item}
+      mode={mode}
+      viewMode={viewMode}
+      folders={folders}
+      onOpen={() => handleOpenDesign(item)}
+      onRename={onRename}
+      onDelete={onDelete}
+      onRestore={onRestore}
+      onPermanentDelete={onPermanentDelete}
+      onMove={onMove}
+    />
+  )
+
+  if (viewMode === 'list') {
+    return (
+      <VirtualList
+        items={items}
+        getKey={(item) => item.id}
+        renderItem={renderItem}
+        mode="fixed"
+        itemHeight={186}
+        hasMore={hasMore}
+        loadingMore={loadingMore}
+        onNearEnd={onNearEnd}
+        className="my-design-virtual-list"
+        ariaLabel="我的设计列表"
+      />
+    )
+  }
+
   return (
-    <div className={cn('my-design-grid', viewMode === 'list' && 'my-design-grid--list')}>
-      {items.map((item) => (
-        <DesignCard
-          key={item.id}
-          item={item}
-          mode={mode}
-          viewMode={viewMode}
-          folders={folders}
-          onOpen={() => handleOpenDesign(item)}
-          onRename={onRename}
-          onDelete={onDelete}
-          onRestore={onRestore}
-          onPermanentDelete={onPermanentDelete}
-          onMove={onMove}
-        />
-      ))}
-    </div>
+    <VirtualGrid
+      items={items}
+      getKey={(item) => item.id}
+      renderItem={renderItem}
+      hasMore={hasMore}
+      loadingMore={loadingMore}
+      onNearEnd={onNearEnd}
+      className="my-design-virtual-grid"
+      ariaLabel="我的设计网格"
+    />
   )
 }
 
